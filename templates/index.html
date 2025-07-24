@@ -1,0 +1,255 @@
+{% load static %}
+{% if not user.is_authenticated %}
+  <script>
+    alert('Login to continue');
+    window.location.href = "/";
+  </script>
+{% endif %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Personality Chatbot</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Custom scrollbar */
+    #chat-history::-webkit-scrollbar { width: 6px; }
+    #chat-history::-webkit-scrollbar-track { background: #f1f1f1; }
+    #chat-history::-webkit-scrollbar-thumb { background: #a8a29e; border-radius: 6px; }
+    #chat-history::-webkit-scrollbar-thumb:hover { background: #78716c; }
+
+    /* Animation for new messages */
+    @keyframes fade-in-slide-up {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .message-bubble {
+      animation: fade-in-slide-up 0.3s ease-out;
+    }
+  </style>
+  {{ questions|json_script:"questions-data" }}
+  {{ intro|json_script:"intro-data" }}
+</head>
+
+<body class="bg-gray-100">
+  <!-- Main container: Fullscreen on mobile, card on desktop -->
+  <div class="relative w-full h-screen sm:max-w-lg mx-auto bg-white sm:rounded-2xl sm:shadow-2xl flex flex-col">
+
+    <!-- Header -->
+    <div class="p-3 sm:p-4 border-b flex items-center justify-between bg-white sm:rounded-t-2xl sticky top-0 z-10">
+      <div class="flex items-center space-x-3">
+        <div class="p-2 bg-purple-100 rounded-full">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+          </svg>
+        </div>
+        <h1 class="text-lg sm:text-xl font-bold text-gray-800">Personality Chatbot</h1>
+      </div>
+      <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit" class="p-2 text-gray-500 hover:bg-gray-100 hover:text-purple-600 rounded-full transition-colors" title="Logout">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          </svg>
+        </button>
+      </form>
+    </div>
+
+    <!-- Spinner (now contained within the card) -->
+    <div id="spinner" class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-80 hidden z-20 sm:rounded-2xl">
+      <div class="w-16 h-16 border-4 border-purple-500 border-dashed rounded-full animate-spin"></div>
+    </div>
+
+    <!-- Chat History -->
+    <div id="chat-history" class="flex-1 p-4 space-y-4 overflow-y-auto">
+      {% if questions %}
+      <!-- chat will dynamically load -->
+      {% elif profile %}
+      <div class="flex justify-start">
+        <div class="message-bubble bg-purple-100 text-gray-800 p-3 rounded-2xl rounded-bl-none max-w-[85%] shadow-sm">
+          <p class="font-semibold text-purple-700 mb-2">Your Personality Profile:</p>
+          <p class="text-sm sm:text-base whitespace-pre-wrap">{{ profile }}</p>
+        </div>
+      </div>
+      {% else %}
+      <div class="flex justify-start">
+        <div class="message-bubble bg-purple-100 text-gray-800 p-3 rounded-2xl rounded-bl-none max-w-[85%] shadow-sm">
+          <p class="text-sm sm:text-base">Hello! I'm a chatbot designed to understand your personality. To begin, please tell me a little about yourself.</p>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Action Area (Input Form / Buttons) -->
+    <div id="action-area" class="p-3 sm:p-4 border-t bg-gray-50 sm:rounded-b-2xl">
+      {% if not questions and not profile %}
+      <form method="post" action="/home/" id="intro-form" class="relative">
+        {% csrf_token %}
+        <input name="intro" placeholder="I enjoy reading, hiking..." required class="w-full py-3 pl-4 pr-12 text-gray-700 bg-white border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-400" autocomplete="off">
+        <button type="submit" class="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-purple-600 text-white rounded-full hover:bg-purple-700 transition">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.428A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+          </svg>
+        </button>
+      </form>
+      <script>
+        document.getElementById('intro-form').addEventListener('submit', function () {
+          document.getElementById('spinner').classList.remove('hidden');
+        });
+      </script>
+      {% elif questions %}
+      <form method="post" action="/home/submit/" id="chat-form">
+        {% csrf_token %}
+        <input type="hidden" name="intro" value="{{ intro }}">
+      </form>
+      <div id="quick-reply-container"></div>
+      <div id="typing-indicator" class="hidden">
+        <div class="flex items-center space-x-2 p-2">
+            <div class="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
+            <div class="w-2 h-2 bg-purple-400 rounded-full animate-pulse [animation-delay:0.2s]"></div>
+            <div class="w-2 h-2 bg-purple-400 rounded-full animate-pulse [animation-delay:0.4s]"></div>
+            <span class="text-sm text-gray-500">Bot is typing...</span>
+        </div>
+      </div>
+      {% elif profile %}
+      <div class="text-center">
+        <a href="/home/" class="inline-block py-3 px-8 bg-purple-600 text-white rounded-full font-semibold hover:bg-purple-700 transition transform hover:-translate-y-0.5 shadow-md">Start Over</a>
+      </div>
+      {% endif %}
+    </div>
+
+  </div>
+
+  {% if questions %}
+  <script>
+    const questions = JSON.parse(document.getElementById('questions-data').textContent);
+    const userIntro = JSON.parse(document.getElementById('intro-data').textContent);
+    let currentIndex = 0;
+
+    const chatHistory = document.getElementById('chat-history');
+    const form = document.getElementById('chat-form');
+    const quickReplyContainer = document.getElementById('quick-reply-container');
+    const typingIndicator = document.getElementById('typing-indicator');
+    const spinner = document.getElementById('spinner');
+
+    function scrollToBottom() {
+      chatHistory.scrollTo({ top: chatHistory.scrollHeight, behavior: 'smooth' });
+    }
+
+    function addMessage(text, sender) {
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `flex mb-2 ${sender === 'user' ? 'justify-end' : 'justify-start'}`;
+      
+      const bubble = document.createElement('div');
+      bubble.className = `p-3 rounded-2xl max-w-[85%] shadow-sm message-bubble ${sender === 'user' ? 'bg-purple-600 text-white rounded-br-none' : 'bg-purple-100 text-gray-800 rounded-bl-none'}`;
+      bubble.textContent = text;
+
+      messageDiv.appendChild(bubble);
+      chatHistory.appendChild(messageDiv);
+      scrollToBottom();
+    }
+
+    function showTyping(show) {
+      typingIndicator.classList.toggle('hidden', !show);
+      if (show) scrollToBottom();
+    }
+
+    function showQuickReplies() {
+      quickReplyContainer.innerHTML = '';
+      quickReplyContainer.classList.remove('hidden');
+      const formEl = document.createElement('form');
+      formEl.className = 'relative';
+      formEl.onsubmit = (e) => {
+        e.preventDefault();
+        const inputVal = formEl.elements['text-answer'].value.trim();
+        if (inputVal) handleReply(inputVal);
+      };
+
+      const inputEl = document.createElement('input');
+      inputEl.type = 'text';
+      inputEl.name = 'text-answer';
+      inputEl.placeholder = 'Type your response...';
+      inputEl.required = true;
+      inputEl.autocomplete = 'off';
+      inputEl.className = 'w-full py-3 pl-4 pr-12 text-gray-700 bg-white border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-400';
+
+      const submitBtn = document.createElement('button');
+      submitBtn.type = 'submit';
+      submitBtn.className = 'absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-purple-600 text-white rounded-full hover:bg-purple-700 transition';
+      submitBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.428A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" /></svg>`;
+
+      formEl.appendChild(inputEl);
+      formEl.appendChild(submitBtn);
+      quickReplyContainer.appendChild(formEl);
+      inputEl.focus();
+
+      scrollToBottom();
+    }
+
+    function handleReply(answer) {
+      addMessage(answer, 'user');
+      quickReplyContainer.classList.add('hidden');
+      
+      const q = questions[currentIndex].replace(/[\[\]\(\)\"\'\,]/g, '');
+      const qInput = document.createElement('input');
+      qInput.type = 'hidden';
+      qInput.name = 'questions';
+      qInput.value = q;
+      form.appendChild(qInput);
+
+      const aInput = document.createElement('input');
+      aInput.type = 'hidden';
+      aInput.name = `answer_${currentIndex}`;
+      aInput.value = answer;
+      form.appendChild(aInput);
+
+      currentIndex++;
+      if (currentIndex < questions.length) {
+        setTimeout(askNextQuestion, 500);
+      } else {
+        setTimeout(submitProfile, 1000);
+      }
+    }
+
+    function askNextQuestion() {
+      showTyping(true);
+      setTimeout(() => {
+        showTyping(false);
+        const q = questions[currentIndex].replace(/[\[\]\(\)\"\'\,]/g, '');
+        addMessage(`${q}`, 'bot');
+        showQuickReplies();
+      }, 1000 + Math.random() * 500);
+    }
+
+    function submitProfile() {
+      showTyping(true);
+      setTimeout(() => {
+        showTyping(false);
+        addMessage("Great, I have everything I need. Analyzing your profile now...", 'bot');
+        spinner.classList.remove('hidden');
+        setTimeout(() => {
+          form.submit();
+        }, 1500);
+      }, 1000);
+    }
+
+    function startConversation() {
+      addMessage(userIntro, 'user');
+      setTimeout(() => {
+        showTyping(true);
+        setTimeout(() => {
+            showTyping(false);
+            addMessage("Thanks for sharing! Now, please answer a few questions to help me understand you better.", 'bot');
+            askNextQuestion();
+        }, 1200);
+      }, 500);
+    }
+
+    window.onload = startConversation;
+  </script>
+  {% endif %}
+</body>
+</html>
