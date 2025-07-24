@@ -7,7 +7,10 @@ from .gpt_helper import select_best_questions, generate_personality_profile
 def index(request):
     if request.method == 'POST':
         user_intro = request.POST.get('intro', '')
-        questions = select_best_questions(user_intro)
+        qa_data = select_best_questions(user_intro)
+        questions = [q["question"] for q in qa_data]
+        options = [q["options"] for q in qa_data]
+
 
         # Ensure questions is a list of clean sentences
         if isinstance(questions, str):
@@ -18,10 +21,13 @@ def index(request):
             else:
                 questions = [q.strip() for q in questions.split('.') if len(q.strip()) > 5]
 
+        
         return render(request, 'index.html', {
             'intro': user_intro,
-            'questions': questions
+            'questions': questions,
+            'options': options
         })
+
 
     return render(request, 'index.html', {
         'intro': None,
