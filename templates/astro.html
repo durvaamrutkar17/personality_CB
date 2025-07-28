@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>AstroBot - Your Personal Astrologer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+  
+  <style>
+    /* --- LIGHT THEME COLOR PALETTE --- */
+    :root {
+      --primary-color: #007bff; /* A friendly, professional blue */
+      --secondary-color: #0056b3; /* A darker shade for gradients/hovers */
+      --text-color: #343a40; /* Dark grey for high readability */
+      --user-bubble-bg: #007bff;
+      --bot-bubble-bg: #E9ECEF; /* Light grey for bot messages */
+      --bot-text-color: #495057; /* Darker text for bot messages */
+      --bg-gradient-start: #f8f9fa; /* Very light grey background */
+      --bg-gradient-end: #e9ecef;
+    }
+
+    body {
+      /* Swapped dark gradient for a light one */
+      background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+      font-family: 'Roboto', sans-serif;
+      color: var(--text-color); /* Main text color is now dark */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      overflow: hidden;
+    }
+
+    .chat-container {
+      width: 90%;
+      max-width: 500px;
+      height: 90vh;
+      max-height: 700px;
+      display: flex;
+      flex-direction: column;
+      /* Changed to a solid white background with a light shadow */
+      background-color: #ffffff;
+      border-radius: 15px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+      border: 1px solid #dee2e6;
+    }
+
+    .chat-header {
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      color: #ffffff; /* Explicitly set header text to white */
+      padding: 15px 20px;
+      border-top-left-radius: 15px;
+      border-top-right-radius: 15px;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    .chat-header h2 {
+      margin: 0;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.5em;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    }
+
+    .chat-box {
+      flex-grow: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    
+    /* Custom Scrollbar for Light Theme */
+    .chat-box::-webkit-scrollbar {
+        width: 8px;
+    }
+    .chat-box::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+    .chat-box::-webkit-scrollbar-thumb {
+        background-color: #ccc;
+        border-radius: 10px;
+    }
+    .chat-box::-webkit-scrollbar-thumb:hover {
+        background-color: #aaa;
+    }
+
+    .message {
+      max-width: 80%;
+      padding: 12px 18px;
+      border-radius: 20px;
+      line-height: 1.5;
+      word-wrap: break-word;
+      animation: pop-in 0.3s ease-out;
+    }
+
+    @keyframes pop-in {
+      from { transform: scale(0.8); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .bot-message {
+      background-color: var(--bot-bubble-bg);
+      color: var(--bot-text-color); /* Use specific dark color for bot text */
+      align-self: flex-start;
+      border-bottom-left-radius: 5px;
+    }
+    .user-message {
+      background-color: var(--user-bubble-bg);
+      color: white;
+      align-self: flex-end;
+      border-bottom-right-radius: 5px;
+    }
+    
+    .typing-indicator {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .typing-indicator span {
+      height: 8px;
+      width: 8px;
+      background-color: #adb5bd; /* A medium grey for the dots */
+      border-radius: 50%;
+      display: inline-block;
+      animation: bounce 1.4s infinite ease-in-out both;
+    }
+    .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+    .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+    
+    @keyframes bounce {
+      0%, 80%, 100% { transform: scale(0); }
+      40% { transform: scale(1.0); }
+    }
+
+    .chat-input-area {
+      display: flex;
+      padding: 15px;
+      background-color: #f8f9fa; /* Slightly off-white input area */
+      border-top: 1px solid #dee2e6;
+      border-bottom-left-radius: 15px;
+      border-bottom-right-radius: 15px;
+    }
+
+    #user-input {
+      flex-grow: 1;
+      border: 1px solid #ced4da;
+      background-color: #ffffff;
+      border-radius: 20px;
+      padding: 10px 15px;
+      color: var(--text-color);
+      font-size: 1em;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    #user-input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+    }
+
+    #send-btn {
+      margin-left: 10px;
+      background: var(--primary-color);
+      border: none;
+      border-radius: 50%;
+      width: 45px;
+      height: 45px;
+      cursor: pointer;
+      color: white;
+      font-size: 1.5em;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: background-color 0.3s;
+    }
+    #send-btn:hover {
+      background-color: var(--secondary-color);
+    }
+
+  </style>
+</head>
+<body>
+
+  <div class="chat-container">
+    <div class="chat-header">
+      <h2>✨ AstroBot ✨</h2>
+    </div>
+    <div id="chat-box" class="chat-box">
+      <!-- Messages will be injected here by JavaScript -->
+    </div>
+    <div class="chat-input-area">
+      <input type="text" id="user-input" placeholder="Type your message..." autocomplete="off">
+      <button id="send-btn" title="Send">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+      </button>
+    </div>
+  </div>
+  
+  <!-- This is the hidden form that JS will use to submit data to Django -->
+  <form method="post" id="astro-form" style="display:none;">
+    {% csrf_token %}
+    <input type="date" name="dob" id="hidden-dob">
+    <input type="time" name="tob" id="hidden-tob">
+    <input type="text" name="place" id="hidden-place">
+  </form>
+
+  <!-- This hidden div holds the response from Django after form submission -->
+  {% if response %}
+    <div id="django-response" style="display:none;">{{ response }}</div>
+  {% endif %}
+
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const chatBox = document.getElementById('chat-box');
+      const userInput = document.getElementById('user-input');
+      const sendBtn = document.getElementById('send-btn');
+      
+      let conversationState = 'awaiting_dob';
+      const userDetails = { dob: '', tob: '', place: '' };
+
+      const botQuestions = {
+        dob: "Welcome to AstroBot! I can generate your personalized astrological report. To begin, please enter your <b>Date of Birth</b> (e.g., YYYY-MM-DD).",
+        tob: "Great! Now, what is your <b>Time of Birth</b>? Please use a 24-hour format (e.g., 14:30).",
+        place: "Perfect. Finally, what is your <b>Place of Birth</b>? (e.g., New York, USA)",
+        processing: "Thank you! I have all the details. Casting the stars for you now... ✨",
+      };
+
+      function addMessage(text, sender) {
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('message', `${sender}-message`);
+        messageElement.innerHTML = text; // Use innerHTML to render bold tags
+        chatBox.appendChild(messageElement);
+        chatBox.scrollTop = chatBox.scrollHeight;
+      }
+      
+      function showTypingIndicator() {
+        const typingElement = document.createElement('div');
+        typingElement.classList.add('message', 'bot-message', 'typing-indicator');
+        typingElement.id = 'typing';
+        typingElement.innerHTML = `<span></span><span></span><span></span>`;
+        chatBox.appendChild(typingElement);
+        chatBox.scrollTop = chatBox.scrollHeight;
+      }
+      
+      function removeTypingIndicator() {
+        const typingElement = document.getElementById('typing');
+        if (typingElement) {
+          typingElement.remove();
+        }
+      }
+      
+      function askNextQuestion() {
+        showTypingIndicator();
+        setTimeout(() => {
+          removeTypingIndicator();
+          let question = '';
+          if (conversationState === 'awaiting_dob') {
+            question = botQuestions.dob;
+            userInput.type = 'date'; // Change input type for better UX
+            userInput.placeholder = 'YYYY-MM-DD';
+          } else if (conversationState === 'awaiting_tob') {
+            question = botQuestions.tob;
+            userInput.type = 'time'; // Change input type
+            userInput.placeholder = 'HH:MM';
+          } else if (conversationState === 'awaiting_place') {
+            question = botQuestions.place;
+            userInput.type = 'text'; // Change back to text
+            userInput.placeholder = 'e.g., London, UK';
+          }
+          addMessage(question, 'bot');
+        }, 1200);
+      }
+
+      function handleUserInput() {
+        const text = userInput.value.trim();
+        if (!text) return;
+        
+        addMessage(text, 'user');
+        
+        switch (conversationState) {
+          case 'awaiting_dob':
+            userDetails.dob = text;
+            conversationState = 'awaiting_tob';
+            askNextQuestion();
+            break;
+          case 'awaiting_tob':
+            userDetails.tob = text;
+            conversationState = 'awaiting_place';
+            askNextQuestion();
+            break;
+          case 'awaiting_place':
+            userDetails.place = text;
+            conversationState = 'processing';
+            submitDetails();
+            break;
+        }
+        
+        userInput.value = '';
+      }
+      
+      function submitDetails() {
+        showTypingIndicator();
+        setTimeout(() => {
+          removeTypingIndicator();
+          addMessage(botQuestions.processing, 'bot');
+
+          // Populate and submit the hidden form
+          document.getElementById('hidden-dob').value = userDetails.dob;
+          document.getElementById('hidden-tob').value = userDetails.tob;
+          document.getElementById('hidden-place').value = userDetails.place;
+          
+          setTimeout(() => {
+            document.getElementById('astro-form').submit();
+          }, 1000); // Small delay to let user read the message
+          
+        }, 1500);
+      }
+
+      // --- Event Listeners ---
+      sendBtn.addEventListener('click', handleUserInput);
+      userInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          handleUserInput();
+        }
+      });
+      
+      // --- Initial Load Logic ---
+      const djangoResponseDiv = document.getElementById('django-response');
+      if (djangoResponseDiv) {
+        // If there's a response, it means the form was submitted.
+        // We need to reconstruct the chat and show the final answer.
+        const submittedData = {
+          dob: document.getElementById('hidden-dob').value,
+          tob: document.getElementById('hidden-tob').value,
+          place: document.getElementById('hidden-place').value,
+        }
+        
+        addMessage(botQuestions.dob, 'bot');
+        addMessage(submittedData.dob, 'user');
+        addMessage(botQuestions.tob, 'bot');
+        addMessage(submittedData.tob, 'user');
+        addMessage(botQuestions.place, 'bot');
+        addMessage(submittedData.place, 'user');
+        addMessage(botQuestions.processing, 'bot');
+        
+        showTypingIndicator();
+        setTimeout(() => {
+          removeTypingIndicator();
+          addMessage(djangoResponseDiv.innerHTML, 'bot');
+          userInput.placeholder = 'Refresh to start over.';
+          userInput.disabled = true;
+          sendBtn.disabled = true;
+        }, 2000);
+        
+      } else {
+        // This is a fresh session, start the conversation.
+        askNextQuestion();
+      }
+    });
+  </script>
+</body>
+</html>
