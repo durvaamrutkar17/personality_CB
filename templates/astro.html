@@ -55,6 +55,7 @@
       border-top-right-radius: 15px;
       text-align: center;
       box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      position: relative; /* Added to position the logout button */
     }
     .chat-header h2 {
       margin: 0;
@@ -63,6 +64,27 @@
       text-shadow: 0 1px 2px rgba(0,0,0,0.2);
     }
 
+    /* --- Logout Button Style (New) --- */
+    .logout-btn {
+      position: absolute;
+      top: 50%;
+      right: 20px;
+      transform: translateY(-50%);
+      padding: 6px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      border-radius: 20px;
+      color: white;
+      text-decoration: none;
+      font-size: 0.8rem;
+      font-weight: 500;
+      transition: background-color 0.2s, border-color 0.2s;
+    }
+
+    .logout-btn:hover {
+      background-color: rgba(255, 255, 255, 0.15);
+      border-color: white;
+    }
+    
     .chat-box {
       flex-grow: 1;
       padding: 20px;
@@ -186,6 +208,8 @@
   <div class="chat-container">
     <div class="chat-header">
       <h2>✨ AstroBot ✨</h2>
+      <!-- Logout Button Added -->
+      <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
     </div>
     <div id="chat-box" class="chat-box">
       <!-- Messages will be injected here by JavaScript -->
