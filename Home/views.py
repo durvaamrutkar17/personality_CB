@@ -7,7 +7,7 @@ from .gpt_helper import (
     generate_personality_profile,
     generate_feedback
 )
-
+from .models import personalityResponse
 @csrf_exempt
 def index(request):
     if request.method == 'POST':
@@ -45,7 +45,10 @@ def submit(request):
         answers = [request.POST.get(f'answer_{i}', '') for i in range(len(questions))]
         qa_pairs = list(zip(questions, answers))
         profile = generate_personality_profile(user_intro, qa_pairs)
-
+        personalityResponse.objects.create(
+            user=request.user,  
+            response=profile
+        )
         return render(request, 'index.html', {
             'intro': user_intro,
             'profile': profile

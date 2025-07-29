@@ -1,250 +1,124 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
   <title>AstroBot - Your Personal Astrologer</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
-  
+
   <style>
-    /* --- LIGHT THEME COLOR PALETTE --- */
-    :root {
-      --primary-color: #007bff; /* A friendly, professional blue */
-      --secondary-color: #0056b3; /* A darker shade for gradients/hovers */
-      --text-color: #343a40; /* Dark grey for high readability */
-      --user-bubble-bg: #007bff;
-      --bot-bubble-bg: #E9ECEF; /* Light grey for bot messages */
-      --bot-text-color: #495057; /* Darker text for bot messages */
-      --bg-gradient-start: #f8f9fa; /* Very light grey background */
-      --bg-gradient-end: #e9ecef;
-    }
-
-    body {
-      /* Swapped dark gradient for a light one */
-      background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
-      font-family: 'Roboto', sans-serif;
-      color: var(--text-color); /* Main text color is now dark */
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-      overflow: hidden;
-    }
-
-    .chat-container {
-      width: 90%;
-      max-width: 500px;
-      height: 90vh;
-      max-height: 700px;
-      display: flex;
-      flex-direction: column;
-      /* Changed to a solid white background with a light shadow */
-      background-color: #ffffff;
-      border-radius: 15px;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-      border: 1px solid #dee2e6;
-    }
-
-    .chat-header {
-      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-      color: #ffffff; /* Explicitly set header text to white */
-      padding: 15px 20px;
-      border-top-left-radius: 15px;
-      border-top-right-radius: 15px;
-      text-align: center;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-      position: relative; /* Added to position the logout button */
-    }
-    .chat-header h2 {
-      margin: 0;
-      font-family: 'Orbitron', sans-serif;
-      font-size: 1.5em;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.2);
-    }
-
-    /* --- Logout Button Style (New) --- */
-    .logout-btn {
-      position: absolute;
-      top: 50%;
-      right: 20px;
-      transform: translateY(-50%);
-      padding: 6px 14px;
-      border: 1px solid rgba(255, 255, 255, 0.7);
-      border-radius: 20px;
-      color: white;
-      text-decoration: none;
-      font-size: 0.8rem;
-      font-weight: 500;
-      transition: background-color 0.2s, border-color 0.2s;
-    }
-
-    .logout-btn:hover {
-      background-color: rgba(255, 255, 255, 0.15);
-      border-color: white;
-    }
-    
-    .chat-box {
-      flex-grow: 1;
-      padding: 20px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-    }
-    
-    /* Custom Scrollbar for Light Theme */
-    .chat-box::-webkit-scrollbar {
-        width: 8px;
-    }
-    .chat-box::-webkit-scrollbar-track {
-        background: #f1f1f1;
-    }
-    .chat-box::-webkit-scrollbar-thumb {
-        background-color: #ccc;
-        border-radius: 10px;
-    }
-    .chat-box::-webkit-scrollbar-thumb:hover {
-        background-color: #aaa;
-    }
-
-    .message {
-      max-width: 80%;
-      padding: 12px 18px;
-      border-radius: 20px;
-      line-height: 1.5;
-      word-wrap: break-word;
-      animation: pop-in 0.3s ease-out;
-    }
+    /* Custom styles for animations and scrollbar */
+    .font-orbitron { font-family: 'Orbitron', sans-serif; }
+    .custom-scrollbar::-webkit-scrollbar { width: 8px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #ccc; border-radius: 10px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background-color: #aaa; }
 
     @keyframes pop-in {
       from { transform: scale(0.8); opacity: 0; }
       to { transform: scale(1); opacity: 1; }
     }
+    .animate-pop-in { animation: pop-in 0.3s ease-out forwards; }
 
-    .bot-message {
-      background-color: var(--bot-bubble-bg);
-      color: var(--bot-text-color); /* Use specific dark color for bot text */
-      align-self: flex-start;
-      border-bottom-left-radius: 5px;
-    }
-    .user-message {
-      background-color: var(--user-bubble-bg);
-      color: white;
-      align-self: flex-end;
-      border-bottom-right-radius: 5px;
-    }
-    
-    .typing-indicator {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-    .typing-indicator span {
-      height: 8px;
-      width: 8px;
-      background-color: #adb5bd; /* A medium grey for the dots */
-      border-radius: 50%;
-      display: inline-block;
-      animation: bounce 1.4s infinite ease-in-out both;
-    }
-    .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
-    .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
-    
     @keyframes bounce {
       0%, 80%, 100% { transform: scale(0); }
       40% { transform: scale(1.0); }
     }
-
-    .chat-input-area {
-      display: flex;
-      padding: 15px;
-      background-color: #f8f9fa; /* Slightly off-white input area */
-      border-top: 1px solid #dee2e6;
-      border-bottom-left-radius: 15px;
-      border-bottom-right-radius: 15px;
-    }
-
-    #user-input {
-      flex-grow: 1;
-      border: 1px solid #ced4da;
-      background-color: #ffffff;
-      border-radius: 20px;
-      padding: 10px 15px;
-      color: var(--text-color);
-      font-size: 1em;
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
-    #user-input:focus {
-      outline: none;
-      border-color: var(--primary-color);
-      box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
-    }
-
-    #send-btn {
-      margin-left: 10px;
-      background: var(--primary-color);
-      border: none;
-      border-radius: 50%;
-      width: 45px;
-      height: 45px;
-      cursor: pointer;
-      color: white;
-      font-size: 1.5em;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      transition: background-color 0.3s;
-    }
-    #send-btn:hover {
-      background-color: var(--secondary-color);
-    }
-
+    .animate-bounce-custom { animation: bounce 1.4s infinite ease-in-out both; }
   </style>
 </head>
-<body>
+<body class="bg-gradient-to-br from-gray-50 to-gray-200 font-sans text-gray-800 flex justify-center items-center min-h-screen p-4">
 
-  <div class="chat-container">
-    <div class="chat-header">
-      <h2>✨ AstroBot ✨</h2>
-      <!-- Logout Button Added -->
-      <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
+  <!-- Main Chat Container -->
+  <div class="w-full md:w-3/4 lg:w-3/5 xl:w-1/2 max-w-3xl h-[90vh] max-h-[800px] flex flex-col bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden">
+    
+    <!-- Chat Header -->
+    <div class="relative flex-shrink-0 bg-gradient-to-br from-blue-600 to-blue-800 text-white p-5 shadow-md flex justify-between items-center">
+      <!-- Mute/Unmute Button -->
+      <button id="toggle-audio-btn" class="w-10 h-10 flex items-center justify-center rounded-full transition-colors duration-200 hover:bg-white/15" title="Toggle Audio">
+        <svg id="speaker-on-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-volume-2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+        <svg id="speaker-off-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-volume-x hidden"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" x2="17" y1="9" y2="15"/><line x1="17" x2="23" y1="9" y2="15"/></svg>
+      </button>
+      <h2 class="font-orbitron text-2xl absolute left-1/2 -translate-x-1/2">✨ AstroBot ✨</h2>
+      <a href="{% url 'logout' %}" class="py-1.5 px-4 border border-white/70 rounded-full text-white text-sm font-medium transition-colors duration-200 hover:bg-white/15 hover:border-white">Logout</a>
     </div>
-    <div id="chat-box" class="chat-box">
-      <!-- Messages will be injected here by JavaScript -->
+
+    <!-- Chat Message Box -->
+    <div id="chat-box" class="flex-grow p-4 sm:p-6 overflow-y-auto flex flex-col gap-4 custom-scrollbar">
+      <!-- Messages are injected here by JavaScript -->
     </div>
-    <div class="chat-input-area">
-      <input type="text" id="user-input" placeholder="Type your message..." autocomplete="off">
-      <button id="send-btn" title="Send">
+    
+    <!-- Chat Input Area -->
+    <div class="flex-shrink-0 flex items-center p-3 sm:p-4 bg-gray-100 border-t border-gray-200 gap-3">
+      <input type="text" id="user-input" placeholder="Type or press mic to talk..." autocomplete="off" class="flex-grow bg-white border border-gray-300 rounded-full py-2.5 px-5 text-gray-800 text-base focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/50 transition-all duration-200 disabled:bg-gray-200 disabled:cursor-not-allowed">
+      <!-- Microphone Button -->
+      <button id="mic-btn" title="Speak" class="flex-shrink-0 w-12 h-12 flex justify-center items-center bg-gray-200 text-gray-600 rounded-full cursor-pointer transition-colors duration-300 hover:bg-gray-300">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
+      </button>
+      <button id="send-btn" title="Send" class="flex-shrink-0 w-12 h-12 flex justify-center items-center bg-blue-600 text-white rounded-full cursor-pointer transition-colors duration-300 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
       </button>
     </div>
   </div>
   
-  <!-- This is the hidden form that JS will use to submit data to Django -->
-  <form method="post" id="astro-form" style="display:none;">
+  <!-- Hidden form -->
+  <form method="post" id="astro-form" class="hidden">
     {% csrf_token %}
     <input type="date" name="dob" id="hidden-dob">
     <input type="time" name="tob" id="hidden-tob">
     <input type="text" name="place" id="hidden-place">
   </form>
 
-  <!-- This hidden div holds the response from Django after form submission -->
+  <!-- Hidden Django response -->
   {% if response %}
-    <div id="django-response" style="display:none;">{{ response }}</div>
+  <div id="django-response" class="hidden">
+      <h2 class="text-xl font-semibold mb-3 font-orbitron">🪔 Your Astrological Report</h2>
+      <ul class="list-none space-y-4 text-left">
+          {% for point in response %}
+          <li>{{ point|safe }}</li>
+          {% endfor %}
+      </ul>
+  </div>
   {% endif %}
-
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
+      // --- Element References ---
       const chatBox = document.getElementById('chat-box');
       const userInput = document.getElementById('user-input');
       const sendBtn = document.getElementById('send-btn');
-      
+      const micBtn = document.getElementById('mic-btn');
+      const toggleAudioBtn = document.getElementById('toggle-audio-btn');
+      const speakerOnIcon = document.getElementById('speaker-on-icon');
+      const speakerOffIcon = document.getElementById('speaker-off-icon');
+
+      // --- State ---
       let conversationState = 'awaiting_dob';
       const userDetails = { dob: '', tob: '', place: '' };
+      let isMuted = false;
+      let isRecording = false;
 
+      // --- Web Speech API Setup ---
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const recognition = SpeechRecognition ? new SpeechRecognition() : null;
+      const speechSynthesis = window.speechSynthesis;
+      let voices = [];
+
+      function loadVoices() {
+        voices = speechSynthesis.getVoices();
+      }
+      // Voices are loaded asynchronously
+      speechSynthesis.onvoiceschanged = loadVoices;
+      loadVoices();
+
+      // --- Bot Questions ---
       const botQuestions = {
         dob: "Welcome to AstroBot! I can generate your personalized astrological report. To begin, please enter your <b>Date of Birth</b> (e.g., YYYY-MM-DD).",
         tob: "Great! Now, what is your <b>Time of Birth</b>? Please use a 24-hour format (e.g., 14:30).",
@@ -252,28 +126,55 @@
         processing: "Thank you! I have all the details. Casting the stars for you now... ✨",
       };
 
+      // --- Core Functions ---
+      function speakMessage(text) {
+        if (isMuted || !speechSynthesis) return;
+
+        // Clean HTML tags for speech
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = text;
+        const cleanText = tempDiv.textContent || tempDiv.innerText || "";
+        
+        speechSynthesis.cancel(); // Stop any previous speech
+        const utterance = new SpeechSynthesisUtterance(cleanText);
+        
+        // Try to find a better quality voice
+        const googleVoice = voices.find(voice => voice.name.includes('Google') && voice.lang.startsWith('en'));
+        utterance.voice = googleVoice || voices.find(voice => voice.lang.startsWith('en')) || voices[0];
+        
+        speechSynthesis.speak(utterance);
+      }
+
       function addMessage(text, sender) {
         const messageElement = document.createElement('div');
-        messageElement.classList.add('message', `${sender}-message`);
-        messageElement.innerHTML = text; // Use innerHTML to render bold tags
+        const baseClasses = ['max-w-[85%]', 'md:max-w-[80%]', 'py-3', 'px-5', 'rounded-2xl', 'break-words', 'leading-relaxed', 'animate-pop-in'];
+        
+        if (sender === 'user') {
+          messageElement.classList.add(...baseClasses, 'bg-blue-600', 'text-white', 'self-end', 'rounded-br-lg');
+        } else {
+          messageElement.classList.add(...baseClasses, 'bg-gray-200', 'text-gray-800', 'self-start', 'rounded-bl-lg');
+          speakMessage(text); // Speak the bot's message
+        }
+        
+        messageElement.innerHTML = text;
         chatBox.appendChild(messageElement);
         chatBox.scrollTop = chatBox.scrollHeight;
       }
       
       function showTypingIndicator() {
         const typingElement = document.createElement('div');
-        typingElement.classList.add('message', 'bot-message', 'typing-indicator');
         typingElement.id = 'typing';
-        typingElement.innerHTML = `<span></span><span></span><span></span>`;
+        const baseClasses = ['max-w-[85%]', 'md:max-w-[80%]', 'py-3', 'px-5', 'rounded-2xl', 'break-words', 'leading-relaxed', 'animate-pop-in'];
+        typingElement.classList.add(...baseClasses, 'bg-gray-200', 'text-gray-800', 'self-start', 'rounded-bl-lg');
+        
+        typingElement.innerHTML = `<div class="flex items-center justify-center gap-1.5 h-6"><span class="h-2 w-2 bg-gray-400 rounded-full animate-bounce-custom" style="animation-delay: -0.32s;"></span><span class="h-2 w-2 bg-gray-400 rounded-full animate-bounce-custom" style="animation-delay: -0.16s;"></span><span class="h-2 w-2 bg-gray-400 rounded-full animate-bounce-custom"></span></div>`;
+        
         chatBox.appendChild(typingElement);
         chatBox.scrollTop = chatBox.scrollHeight;
       }
       
       function removeTypingIndicator() {
-        const typingElement = document.getElementById('typing');
-        if (typingElement) {
-          typingElement.remove();
-        }
+        document.getElementById('typing')?.remove();
       }
       
       function askNextQuestion() {
@@ -283,43 +184,32 @@
           let question = '';
           if (conversationState === 'awaiting_dob') {
             question = botQuestions.dob;
-            userInput.type = 'date'; // Change input type for better UX
+            userInput.type = 'date';
             userInput.placeholder = 'YYYY-MM-DD';
           } else if (conversationState === 'awaiting_tob') {
             question = botQuestions.tob;
-            userInput.type = 'time'; // Change input type
-            userInput.placeholder = 'HH:MM';
+            userInput.type = 'time';
+            userInput.placeholder = 'HH:MM (24-hour)';
           } else if (conversationState === 'awaiting_place') {
             question = botQuestions.place;
-            userInput.type = 'text'; // Change back to text
+            userInput.type = 'text';
             userInput.placeholder = 'e.g., London, UK';
           }
           addMessage(question, 'bot');
+          userInput.focus();
         }, 1200);
       }
 
       function handleUserInput() {
         const text = userInput.value.trim();
-        if (!text) return;
+        if (!text || userInput.disabled) return;
         
         addMessage(text, 'user');
         
         switch (conversationState) {
-          case 'awaiting_dob':
-            userDetails.dob = text;
-            conversationState = 'awaiting_tob';
-            askNextQuestion();
-            break;
-          case 'awaiting_tob':
-            userDetails.tob = text;
-            conversationState = 'awaiting_place';
-            askNextQuestion();
-            break;
-          case 'awaiting_place':
-            userDetails.place = text;
-            conversationState = 'processing';
-            submitDetails();
-            break;
+          case 'awaiting_dob': userDetails.dob = text; conversationState = 'awaiting_tob'; askNextQuestion(); break;
+          case 'awaiting_tob': userDetails.tob = text; conversationState = 'awaiting_place'; askNextQuestion(); break;
+          case 'awaiting_place': userDetails.place = text; conversationState = 'processing'; submitDetails(); break;
         }
         
         userInput.value = '';
@@ -331,56 +221,107 @@
           removeTypingIndicator();
           addMessage(botQuestions.processing, 'bot');
 
-          // Populate and submit the hidden form
           document.getElementById('hidden-dob').value = userDetails.dob;
           document.getElementById('hidden-tob').value = userDetails.tob;
           document.getElementById('hidden-place').value = userDetails.place;
           
-          setTimeout(() => {
-            document.getElementById('astro-form').submit();
-          }, 1000); // Small delay to let user read the message
-          
+          setTimeout(() => { document.getElementById('astro-form').submit(); }, 1000);
         }, 1500);
       }
 
-      // --- Event Listeners ---
+      // --- Event Handlers ---
       sendBtn.addEventListener('click', handleUserInput);
-      userInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-          handleUserInput();
+      userInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleUserInput(); });
+      
+      toggleAudioBtn.addEventListener('click', () => {
+        isMuted = !isMuted;
+        speakerOnIcon.classList.toggle('hidden', isMuted);
+        speakerOffIcon.classList.toggle('hidden', !isMuted);
+        if (isMuted) {
+          speechSynthesis.cancel();
         }
       });
       
+      // --- Speech Recognition Logic ---
+      if (recognition) {
+        recognition.continuous = false;
+        recognition.interimResults = true;
+        recognition.lang = 'en-US';
+
+        micBtn.addEventListener('click', () => {
+          if (isRecording) {
+            recognition.stop();
+          } else {
+            recognition.start();
+          }
+        });
+
+        recognition.onstart = () => {
+          isRecording = true;
+          micBtn.classList.remove('bg-gray-200', 'hover:bg-gray-300');
+          micBtn.classList.add('bg-red-500', 'text-white', 'animate-pulse');
+          userInput.placeholder = 'Listening...';
+        };
+        
+        recognition.onend = () => {
+          isRecording = false;
+          micBtn.classList.add('bg-gray-200', 'hover:bg-gray-300');
+          micBtn.classList.remove('bg-red-500', 'text-white', 'animate-pulse');
+          userInput.placeholder = 'Type or press mic to talk...';
+          // Automatically send the message after speaking
+          if (userInput.value.trim()) {
+            handleUserInput();
+          }
+        };
+
+        recognition.onresult = (event) => {
+          let transcript = '';
+          for (let i = event.resultIndex; i < event.results.length; ++i) {
+            transcript += event.results[i][0].transcript;
+          }
+          userInput.value = transcript;
+        };
+
+        recognition.onerror = (event) => {
+          console.error('Speech recognition error:', event.error);
+          isRecording = false; // Reset state
+        };
+      } else {
+        // Hide audio features if not supported
+        micBtn.style.display = 'none';
+        toggleAudioBtn.style.display = 'none';
+        console.warn("Speech Recognition or Synthesis not supported by this browser.");
+      }
+
       // --- Initial Load Logic ---
       const djangoResponseDiv = document.getElementById('django-response');
-      if (djangoResponseDiv) {
-        // If there's a response, it means the form was submitted.
-        // We need to reconstruct the chat and show the final answer.
+      if (djangoResponseDiv && djangoResponseDiv.innerHTML.trim() !== "") {
         const submittedData = {
-          dob: document.getElementById('hidden-dob').value,
-          tob: document.getElementById('hidden-tob').value,
-          place: document.getElementById('hidden-place').value,
-        }
+          dob: "{{ request.POST.dob }}",
+          tob: "{{ request.POST.tob }}",
+          place: "{{ request.POST.place }}",
+        };
         
         addMessage(botQuestions.dob, 'bot');
-        addMessage(submittedData.dob, 'user');
+        if (submittedData.dob) addMessage(submittedData.dob, 'user');
         addMessage(botQuestions.tob, 'bot');
-        addMessage(submittedData.tob, 'user');
+        if (submittedData.tob) addMessage(submittedData.tob, 'user');
         addMessage(botQuestions.place, 'bot');
-        addMessage(submittedData.place, 'user');
+        if (submittedData.place) addMessage(submittedData.place, 'user');
         addMessage(botQuestions.processing, 'bot');
         
         showTypingIndicator();
         setTimeout(() => {
           removeTypingIndicator();
           addMessage(djangoResponseDiv.innerHTML, 'bot');
-          userInput.placeholder = 'Refresh to start over.';
+          userInput.placeholder = 'Refresh page to start over.';
           userInput.disabled = true;
           sendBtn.disabled = true;
+          micBtn.disabled = true;
+          micBtn.classList.add('cursor-not-allowed', 'opacity-50');
         }, 2000);
         
       } else {
-        // This is a fresh session, start the conversation.
         askNextQuestion();
       }
     });
