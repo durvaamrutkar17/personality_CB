@@ -36,7 +36,6 @@ def index(request):
         'questions': None
     })
 
-
 @csrf_exempt
 def submit(request):
     if request.method == 'POST':
@@ -45,16 +44,20 @@ def submit(request):
         answers = [request.POST.get(f'answer_{i}', '') for i in range(len(questions))]
         qa_pairs = list(zip(questions, answers))
         profile = generate_personality_profile(user_intro, qa_pairs)
-        personalityResponse.objects.create(
-            user=request.user,  
-            response=profile
+
+        # ✅ Fix: response should be in `defaults`
+        personalityResponse.objects.update_or_create(
+            user=request.user,
+            defaults={'response': profile}
         )
+
         return render(request, 'index.html', {
             'intro': user_intro,
             'profile': profile
         })
 
     return render(request, 'index.html')
+
 
 
 @csrf_exempt

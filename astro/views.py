@@ -1,10 +1,14 @@
 from django.shortcuts import render
+from flask_login import login_required
 from .gpt_helper import get_openai_astrology
+from django.views.decorators.csrf import csrf_exempt
 from .models import astroResponse
 
+@csrf_exempt
 def astro(request):
     response = None
     formatted = None
+
     if request.method == "POST":
         dob = request.POST.get("dob")
         tob = request.POST.get("tob")
@@ -18,7 +22,7 @@ You are a professional astrologer. Based on the following details:
 
 Generate a full astrological report with the following sections:
 Please format your output with clear **numbered bullet points**.  
-Use a **double line break after each point add br tag** for clarity.  
+Use a **double line break after each point and add <br> tag** for clarity.  
 Keep the language simple, insightful, and concise.
 
 1. 🌙 **Vedic Astrology Overview**
@@ -38,12 +42,18 @@ Keep the language simple, insightful, and concise.
 10. 🧭 **Life Path Summary**
         """
 
+        # Call your OpenAI function
         response = get_openai_astrology(prompt)
+
+        # Optional: Add <br><br> after each line break or numbered point
         formatted = format_paragraph(response)
-        astroResponse.objects.create(
-            user=request.user,  
-            response=formatted
+
+        # ✅ Proper usage of update_or_create
+        astroResponse.objects.update_or_create(
+            user=request.user,
+            defaults={'response': formatted}
         )
+
     return render(request, "astro.html", {"response": formatted})
 
 def format_paragraph(paragraph):

@@ -9,4 +9,5 @@ urlpatterns = [
     path('logout/', logout, name='logout'),
     path('home', include('Home.urls')),
     path('astro', include('astro.urls')),
+    path('finalResult', include('finalResult.urls')),
 ]
