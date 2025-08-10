@@ -1,5 +1,4 @@
 from django.shortcuts import render
-from flask_login import login_required
 from .gpt_helper import get_openai_astrology
 from django.views.decorators.csrf import csrf_exempt
 from .models import astroResponse
