@@ -16,6 +16,16 @@
     rel="stylesheet">
 
   <style>
+        body {
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #8cd198, #fbc2eb);
+    }
+
+    #grad {
+      background: linear-gradient(135deg, #fbc2eb, #8cd198);
+    }
+
     /* Custom styles for animations and scrollbar */
     .font-orbitron {
       font-family: 'Orbitron', sans-serif;
@@ -76,10 +86,10 @@
 </head>
 
 <body
-  class="bg-gradient-to-br from-gray-50 to-gray-200 font-sans text-gray-800 flex flex-col justify-center items-center min-h-screen p-4">
+  class="flex flex-col justify-center items-center min-h-screen p-4">
 
   <!-- Main Chat Container -->
-  <div
+  <div id="grad"
     class="w-full md:w-3/4 lg:w-3/5 xl:w-1/2 max-w-3xl h-[90vh] max-h-[800px] flex flex-col bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden">
 
     <!-- Chat Header -->

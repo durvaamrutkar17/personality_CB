@@ -14,6 +14,16 @@
   <title>Personality Chatbot</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #8cd198, #fbc2eb);
+    }
+
+    #grad {
+      background: linear-gradient(135deg, #fbc2eb, #8cd198);
+    }
+
     #chat-history::-webkit-scrollbar {
       width: 6px;
     }
@@ -43,135 +53,81 @@
       }
     }
 
-    .fade-in-effect {
-      animation: fade-in-slide-up 0.5s ease-out;
-    }
-
     .message-bubble {
       animation: fade-in-slide-up 0.3s ease-out;
     }
   </style>
   {{ questions|json_script:"questions-data" }}
   {{ options|json_script:"options-data" }}
-  {{ intro|json_script:"intro-data" }}
 </head>
 
 <body class="bg-gray-100">
-  <div class="relative w-full md:w-2/3 h-screen  mx-auto bg-white sm:rounded-2xl sm:shadow-2xl flex flex-col">
+  <div class="relative w-full md:w-2/3 h-screen mx-auto bg-white sm:rounded-2xl sm:shadow-2xl flex flex-col" id="grad">
 
     <!-- Header -->
-    <div
-      class="p-0 sm:p-1 border-b flex flex-col items-center justify-between bg-white sm:rounded-t-2xl sticky top-0 z-10">
-      <!-- Live Webcam Feed -->
-
-
-
-      <div class="flex items-center space-x-1">
-        <button id="voice-toggle-btn" type="button"
-          class="p-1 text-gray-500 hover:bg-gray-100 hover:text-purple-600 rounded-full transition-colors"
-          title="Toggle Voice Output">
-          <svg id="voice-on-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-            stroke="currentColor" stroke-width="2">
+    <div class="p-2 border-b flex items-center justify-end bg-white sm:rounded-t-2xl sticky top-0 z-10 space-x-2">
+      <button id="continuous-mic-btn" type="button"
+        class="flex items-center space-x-2 px-3 py-1 text-sm text-gray-600 hover:bg-gray-200 rounded-full transition-colors"
+        title="Toggle Continuous Mic Mode">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+          stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+        </svg>
+        <span id="continuous-mic-text">Conversational Chat</span>
+      </button>
+      <button id="voice-toggle-btn" type="button"
+        class="p-1 text-gray-500 hover:bg-gray-100 hover:text-purple-600 rounded-full transition-colors"
+        title="Toggle Voice Output">
+        <svg id="voice-on-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+          stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+        </svg>
+        <svg id="voice-off-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 hidden" fill="none"
+          viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"
+            clip-rule="evenodd" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+        </svg>
+      </button>
+      <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit"
+          class="p-2 text-gray-500 hover:bg-gray-100 hover:text-purple-600 rounded-full transition-colors"
+          title="Logout">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+            stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round"
-              d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
-          </svg>
-          <svg id="voice-off-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 hidden" fill="none"
-            viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round"
-              d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"
-              clip-rule="evenodd" />
-            <path stroke-linecap="round" stroke-linejoin="round" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
           </svg>
         </button>
-        <form method="post" action="{% url 'logout' %}">
-          {% csrf_token %}
-          <button type="submit"
-            class="p-2 text-gray-500 hover:bg-gray-100 hover:text-purple-600 rounded-full transition-colors"
-            title="Logout">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-              stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round"
-                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            </svg>
-          </button>
-        </form>
-      </div>
+      </form>
     </div>
 
-    <!-- Spinner -->
-    <div id="spinner"
-      class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-80 hidden z-20 sm:rounded-2xl">
-      <div class="w-16 h-16 border-4 border-purple-500 border-dashed rounded-full animate-spin"></div>
-    </div>
-
-    <!-- Chat History -->
     <div id="chat-history" class="flex-1 p-4 space-y-4 overflow-y-auto">
       {% if profile %}
-      <!-- Final Profile Display -->
-      <div class="p-4 sm:p-5 bg-purple-50 rounded-lg shadow-inner fade-in-effect">
+      <div class="p-4 sm:p-5 bg-purple-50 rounded-lg shadow-inner message-bubble">
         <h2 class="text-lg sm:text-xl font-bold text-purple-800 mb-3 border-b-2 border-purple-200 pb-2">Your Personality
           Profile</h2>
-        <p id="profile-content-text" class="text-sm sm:text-base whitespace-pre-wrap text-gray-700">{{ profile }}</p>
-      </div>
-      {% elif questions %}
-      <!-- This area is intentionally empty. The chat conversation is built by JavaScript. -->
-      {% else %}
-      <!-- Initial Welcome Message -->
-      <div class="flex justify-start">
-        <div class="message-bubble bg-purple-100 text-gray-800 p-3 rounded-2xl  rounded-bl-none max-w-[85%] shadow-sm">
-          <p class="text-sm sm:text-base">Hello! I'm a chatbot designed to understand your personality. To begin, please
-            tell me a little about yourself.</p>
+        <div id="profile-content-text" class="text-sm sm:text-base whitespace-pre-wrap text-gray-700">{{ profile|safe }}
         </div>
       </div>
       {% endif %}
     </div>
 
-    <!-- Input Area -->
     <div id="action-area" class="p-3 sm:p-4 border-t bg-gray-50 sm:rounded-b-2xl">
       {% if profile %}
-      <div class="text-center">
+      <div class="text-center space-y-3">
         <a href="/home/"
           class="inline-block py-3 px-8 bg-purple-600 text-white rounded-full font-semibold hover:bg-purple-700 transition transform hover:-translate-y-0.5 shadow-md">Start
           Over</a>
-      </div> <br>
-      <div class="text-center">
         <a href="/astro/"
           class="inline-block py-3 px-8 bg-purple-600 text-white rounded-full font-semibold hover:bg-purple-700 transition transform hover:-translate-y-0.5 shadow-md">Astro
-          analysis</a>
+          Analysis</a>
       </div>
-      {% elif not questions and not profile %}
-      <form method="post" action="/home/" id="intro-form" class="relative">
-        {% csrf_token %}
-        <input name="intro" id="intro-input-field" placeholder="I enjoy reading, hiking..." required
-          class="w-full py-3 pl-4 pr-24 text-gray-700 bg-white border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-400"
-          autocomplete="off">
-        <button type="button" id="intro-mic-btn"
-          class="absolute right-[52px] top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-purple-600 transition"
-          title="Use Voice Input">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-            stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round"
-              d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-          </svg>
-        </button>
-        <button type="submit"
-          class="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-purple-600 text-white rounded-full hover:bg-purple-700 transition">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
-            <path
-              d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.428A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
-          </svg>
-        </button>
-      </form>
-      <script>
-        document.getElementById('intro-form').addEventListener('submit', function () {
-          document.getElementById('spinner').classList.remove('hidden');
-        });
-      </script>
-      {% elif questions %}
-      <form method="post" action="/home/submit/" id="chat-form">
-        {% csrf_token %}
-        <input type="hidden" name="intro" value="{{ intro }}">
-      </form>
+      {% else %}
       <div id="quick-reply-container"></div>
       <div id="typing-indicator" class="hidden">
         <div class="flex items-center space-x-2 p-2">
@@ -185,192 +141,178 @@
     </div>
   </div>
 
-
   <script>
-    // --- 1. Universal Setup (Voice Toggle & Speech Recognition) ---
-    const voiceToggleBtn = document.getElementById('voice-toggle-btn');
-    const voiceOnIcon = document.getElementById('voice-on-icon');
-    const voiceOffIcon = document.getElementById('voice-off-icon');
-    let isVoiceEnabled = true;
+    // document.getElementById("continuous-mic-btn").addEventListener("click", function () {
+    //   let el = document.getElementById('continuous-mic-text');
+    //   let textarea = document.getElementById('chat-textarea'); // replace with your textarea's id
+    //   let submitBtn = document.getElementById('submitBtn');
 
+    //   if (el.textContent === 'Conversational Chat') {
+    //     el.textContent = 'Manual Chat';
+    //     textarea.style.display = 'none'; // hide for Conversational Chat
+    //     submitBtn.style.display = 'none';
+    //   } else {
+    //     el.textContent = 'Conversational Chat';
+    //     textarea.style.display = 'block'; // show for Manual Chat
+    //     submitBtn.style.display = 'block';
+    //   }
+    // });
+
+
+    // --- 1. Universal Setup ---
+    const voiceToggleBtn = document.getElementById('voice-toggle-btn');
     if (voiceToggleBtn) {
+      const voiceOnIcon = document.getElementById('voice-on-icon');
+      const voiceOffIcon = document.getElementById('voice-off-icon');
+      let isVoiceEnabled = true;
       voiceToggleBtn.addEventListener('click', () => {
         isVoiceEnabled = !isVoiceEnabled;
         voiceOnIcon.classList.toggle('hidden');
         voiceOffIcon.classList.toggle('hidden');
-        if (!isVoiceEnabled && window.speechSynthesis) {
-          window.speechSynthesis.cancel(); // Stop any current speech
-        }
+        if (!isVoiceEnabled && window.speechSynthesis) window.speechSynthesis.cancel();
         voiceToggleBtn.title = isVoiceEnabled ? 'Mute Voice Output' : 'Unmute Voice Output';
       });
-    }
 
-    function speak(text) {
-      if (!isVoiceEnabled || !window.speechSynthesis) return;
-      window.speechSynthesis.cancel(); // Stop previous speech before starting a new one
-      const utterance = new SpeechSynthesisUtterance(text);
-      window.speechSynthesis.speak(utterance);
+      window.speak = function (text) {
+        if (!isVoiceEnabled || !window.speechSynthesis) return;
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        window.speechSynthesis.speak(utterance);
+      };
+    } else {
+      window.speak = function () { };
     }
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     let recognition;
+    let isContinuousMicOn = false;
+    let isListening = false;
+    let currentMicButton = null;
 
     if (SpeechRecognition) {
       recognition = new SpeechRecognition();
-      recognition.continuous = false;
-      recognition.lang = 'en-US';
       recognition.interimResults = false;
       recognition.maxAlternatives = 1;
+      recognition.lang = 'en-US';
+
+      const continuousMicBtn = document.getElementById('continuous-mic-btn');
+      continuousMicBtn.addEventListener('click', () => {
+        isContinuousMicOn = !isContinuousMicOn;
+        recognition.continuous = false; // Always false to enable auto-submit on pause
+        continuousMicBtn.classList.toggle('bg-purple-200', isContinuousMicOn);
+        continuousMicBtn.classList.toggle('text-purple-800', isContinuousMicOn);
+
+        if (isContinuousMicOn && !isListening) {
+          try { recognition.start(); } catch (e) { }
+        } else if (!isContinuousMicOn && isListening) {
+          recognition.stop();
+        }
+      });
     }
 
-    function setupSpeechRecognition(micBtn, input) {
-    if (micBtn && input && recognition) {
-        recognition.continuous = false; // Set to false to allow onend event to fire
-        recognition.interimResults = false;
-        
-        let isListening = false;
+    // --- 2. Main Chat Logic ---
+    document.addEventListener('DOMContentLoaded', function () {
+      const profileContent = document.getElementById('profile-content-text');
+      if (profileContent) {
+        speak("Here is your personality profile. " + profileContent.textContent);
+        return;
+      }
+
+      const chatHistory = document.getElementById('chat-history');
+      const quickReplyContainer = document.getElementById('quick-reply-container');
+      const typingIndicator = document.getElementById('typing-indicator');
+
+      if (!chatHistory || !quickReplyContainer || !typingIndicator) return;
+
+      const scrollToBottom = () => chatHistory.scrollTo({ top: chatHistory.scrollHeight, behavior: 'smooth' });
+      const showTyping = (show) => {
+        typingIndicator.classList.toggle('hidden', !show);
+        if (show) scrollToBottom();
+      };
+
+      function addMessage(text, sender) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `flex mb-2 ${sender === 'user' ? 'justify-end' : 'justify-start'}`;
+        const bubble = document.createElement('div');
+        bubble.className = `p-3 rounded-2xl max-w-[85%] shadow-sm message-bubble ${sender === 'user' ? 'bg-purple-600 text-white rounded-br-none' : 'bg-purple-100 text-gray-800 rounded-bl-none'}`;
+        bubble.textContent = text;
+        messageDiv.appendChild(bubble);
+        chatHistory.appendChild(messageDiv);
+        scrollToBottom();
+        if (sender === 'bot') speak(text);
+      }
+
+      function setupSpeechRecognition(micBtn, inputEl) {
+        if (!recognition) {
+          if (micBtn) micBtn.style.display = 'none';
+          return;
+        };
+
+        currentMicButton = micBtn; // Keep track of the current mic button to animate
 
         micBtn.addEventListener('click', () => {
-            if (!isListening) {
-                micBtn.disabled = true;
-                micBtn.firstElementChild.classList.add('text-purple-600', 'animate-pulse');
-                
-                recognition.start();
-                isListening = true;
-            } else {
-                // Optionally stop listening if clicked again
-                recognition.stop();
-                isListening = false;
-                micBtn.disabled = false;
-                micBtn.firstElementChild.classList.remove('text-purple-600', 'animate-pulse');
-            }
+          if (isListening) {
+            recognition.stop();
+          } else {
+            try { recognition.start(); } catch (e) { console.error("Mic start error:", e); }
+          }
         });
 
         recognition.onstart = () => {
-            // This event fires when recognition starts
-            isListening = true;
+          isListening = true;
+          if (currentMicButton) currentMicButton.firstElementChild.classList.add('text-purple-600', 'animate-pulse');
         };
 
         recognition.onresult = (event) => {
-            let transcript = '';
-            for (let i = event.resultIndex; i < event.results.length; i++) {
-                transcript += event.results[i][0].transcript;
-            }
-            input.value = transcript.trim();
-            input.focus();
-        };
-
-        recognition.onerror = (event) => {
-            console.error("Speech recognition error:", event.error);
-            alert("Sorry, there was a voice input error. Please try again or type your answer.");
-            isListening = false; // Update state on error
-            micBtn.disabled = false;
-            micBtn.firstElementChild.classList.remove('text-purple-600', 'animate-pulse');
-            // Do not restart on error to avoid an endless loop if the error persists.
+          const transcript = event.results[event.resultIndex][0].transcript;
+          inputEl.value = transcript;
         };
 
         recognition.onend = () => {
-            // This event fires when recognition stops.
-            // If it stopped for a reason other than a manual 'stop()' call, restart it.
-            if (isListening) { 
-                recognition.start();
-            }
+          if (currentMicButton) currentMicButton.firstElementChild.classList.remove('text-purple-600', 'animate-pulse');
+
+          // ✅ Check if speech was captured and submit automatically
+          const finalTranscript = inputEl.value.trim();
+          if (isListening && finalTranscript) {
+            inputEl.form.requestSubmit();
+            inputEl.value = ''; // Clear for next round
+          }
+
+          isListening = false;
+
+          // ✅ If in continuous mode, restart listening automatically
+          if (isContinuousMicOn) {
+            try { recognition.start(); } catch (e) { /* Fails silently if already started */ }
+          }
         };
-    } else if (micBtn) {
-        micBtn.style.display = 'none'; // Hide mic if not supported
-    }
-}
 
-
-    // --- 2. Page-Specific Logic ---
-
-    document.addEventListener('DOMContentLoaded', function () {
-      // Case A: Initial intro form is visible
-      const introMicBtn = document.getElementById('intro-mic-btn');
-      const introInput = document.getElementById('intro-input-field');
-      if (introMicBtn && introInput) {
-        setupSpeechRecognition(introMicBtn, introInput);
+        recognition.onerror = (event) => {
+          if (event.error !== 'no-speech' && event.error !== 'aborted') {
+            console.error('Speech recognition error:', event.error);
+          }
+          isListening = false;
+          if (currentMicButton) currentMicButton.firstElementChild.classList.remove('text-purple-600', 'animate-pulse');
+        };
       }
 
-      // Speak initial welcome message OR final profile
-      const initialBotMessage = document.querySelector('.message-bubble:not(.bg-purple-600) p');
-      const profileContent = document.getElementById('profile-content-text');
-
-      if (profileContent) {
-        // It's the profile page, speak the heading and content
-        const heading = "Here is your personality profile.";
-        setTimeout(() => speak(heading + " " + profileContent.textContent), 500);
-      } else if (initialBotMessage) {
-        // It's the initial welcome page, speak the welcome message
-        setTimeout(() => speak(initialBotMessage.textContent), 500);
-      }
-
-      // Case B: Chat with questions is active
-      const questionsData = document.getElementById('questions-data');
-      if (questionsData) {
-        const questions = JSON.parse(questionsData.textContent);
-        const options = JSON.parse(document.getElementById('options-data').textContent);
-        const userIntro = JSON.parse(document.getElementById('intro-data').textContent);
+      try {
+        let questions = JSON.parse(document.getElementById('questions-data').textContent);
+        let options = JSON.parse(document.getElementById('options-data').textContent);
         let currentIndex = 0;
 
-        const chatHistory = document.getElementById('chat-history');
-        const form = document.getElementById('chat-form');
-        const quickReplyContainer = document.getElementById('quick-reply-container');
-        const typingIndicator = document.getElementById('typing-indicator');
-        const spinner = document.getElementById('spinner');
-
-        function scrollToBottom() {
-          chatHistory.scrollTo({ top: chatHistory.scrollHeight, behavior: 'smooth' });
-        }
-
-        // function addMessage(text, sender) {
-        //   const messageDiv = document.createElement('div');
-        //   messageDiv.className = flex mb-2 ${sender === 'user' ? 'justify-end' : 'justify-start'};
-
-        //   const bubble = document.createElement('div');
-        //   bubble.className = p-3 rounded-2xl max-w-[85%] shadow-sm message-bubble ${sender === 'user' ? 'bg-purple-600 text-white rounded-br-none' : 'bg-purple-100 text-gray-800 rounded-bl-none'};
-        //   bubble.textContent = text;
-
-        //   messageDiv.appendChild(bubble);
-        //   chatHistory.appendChild(messageDiv);
-        //   scrollToBottom();
-
-        //   if (sender === 'bot') {
-        //     speak(text);
-        //   }
-        // }
-
-        function addMessage(text, sender) {
-          const messageDiv = document.createElement('div');
-          messageDiv.className = `flex mb-2 ${sender === 'user' ? 'justify-end' : 'justify-start'}`;
-
-          const bubble = document.createElement('div');
-          bubble.className = `p-3 rounded-2xl max-w-[85%] shadow-sm message-bubble ${sender === 'user'
-            ? 'bg-purple-600 text-white rounded-br-none'
-            : 'bg-purple-100 text-gray-800 rounded-bl-none'}`;
-          bubble.textContent = text;
-
-          messageDiv.appendChild(bubble);
-          chatHistory.appendChild(messageDiv);
-          scrollToBottom();
-
-          if (sender === 'bot') {
-            speak(text);
-          }
-        }
-
-
-        function showTyping(show) {
-          typingIndicator.classList.toggle('hidden', !show);
-          if (show) scrollToBottom();
-        }
+        const form = document.createElement('form');
+        form.method = 'post';
+        form.action = "{% url 'submit' %}";
+        form.id = 'chat-form';
+        form.innerHTML = `{% csrf_token %}<input type="hidden" name="intro" value="">`;
+        document.body.appendChild(form);
 
         function showQuickReplies() {
           quickReplyContainer.innerHTML = '';
           quickReplyContainer.classList.remove('hidden');
 
           const formEl = document.createElement('form');
-          formEl.className = 'space-y-3';
+          formEl.className = 'relative';
           formEl.onsubmit = (e) => {
             e.preventDefault();
             const inputVal = formEl.elements['text-answer'].value.trim();
@@ -378,134 +320,122 @@
           };
 
           const inputGroup = document.createElement('div');
-          inputGroup.className = 'relative';
-
-          const inputEl = document.createElement('input');
-          inputEl.type = 'text';
-          inputEl.name = 'text-answer';
-          inputEl.placeholder = 'Type or click an option...';
-          inputEl.required = true;
-          inputEl.autocomplete = 'off';
-          inputEl.className = 'w-full py-3 pl-4 pr-24 text-gray-700 bg-white border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-400';
+          inputGroup.className = 'relative flex items-center';
 
           const micBtn = document.createElement('button');
           micBtn.type = 'button';
-          micBtn.className = 'absolute right-[52px] top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-purple-600 transition';
-          micBtn.title = 'Use Voice Input';
+          micBtn.className = 'p-2 text-gray-400 hover:text-purple-600 transition';
           micBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" /></svg>`;
-
-          const submitBtn = document.createElement('button');
-          submitBtn.type = 'submit';
-          submitBtn.className = 'absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-purple-600 text-white rounded-full hover:bg-purple-700 transition';
-          submitBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.428A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" /></svg>`;
-
-          inputGroup.appendChild(inputEl);
           inputGroup.appendChild(micBtn);
-          inputGroup.appendChild(submitBtn);
+
+          let inputEl;
+          if (currentIndex === 0) {
+            inputEl = document.createElement('textarea');
+            inputEl.id = 'chat-textarea';
+            inputEl.rows = 2;
+            inputEl.placeholder = 'Type or speak your introduction...';
+            inputEl.className = 'w-full p-3 pl-2 pr-16 text-gray-700 bg-white border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-purple-400 resize-none';
+          } else {
+            inputEl = document.createElement('input');
+            inputEl.type = 'text';
+            inputEl.placeholder = 'Type, speak, or click an option...';
+            inputEl.className = 'w-full py-3 pl-2 pr-16 text-gray-700 bg-white border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-400';
+          }
+          inputEl.name = 'text-answer';
+          inputEl.required = true;
+          inputEl.autocomplete = 'off';
+          inputGroup.appendChild(inputEl);
 
           setupSpeechRecognition(micBtn, inputEl);
 
-          const optsDiv = document.createElement('div');
-          optsDiv.className = 'flex flex-wrap gap-2 justify-center';
+          const submitBtn = document.createElement('button');
+          submitBtn.type = 'submit';
+          submitBtn.id = 'submitBtn';
+          submitBtn.className = 'absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-purple-600 text-white rounded-full hover:bg-purple-700 transition';
+          submitBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.428A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" /></svg>`;
+          inputGroup.appendChild(submitBtn);
 
-          options[currentIndex].forEach(opt => {
-            const btn = document.createElement('button');
-            btn.type = 'button';
-            btn.className = 'px-4 py-2 bg-gray-200 hover:bg-purple-200 text-gray-800 rounded-full transition-colors';
-            btn.textContent = opt;
-            btn.onclick = () => {
-              inputEl.value = opt;
-              formEl.requestSubmit();
-            };
-            optsDiv.appendChild(btn);
-          });
-
-          formEl.appendChild(optsDiv);
           formEl.appendChild(inputGroup);
+
+          if (currentIndex > 0 && options[currentIndex] && options[currentIndex].length > 0) {
+            const optsDiv = document.createElement('div');
+            optsDiv.className = 'flex flex-wrap gap-2 justify-center pt-3';
+            options[currentIndex].forEach(opt => {
+              const btn = document.createElement('button');
+              btn.type = 'button';
+              btn.className = 'px-4 py-2 bg-gray-200 hover:bg-purple-200 text-gray-800 rounded-full transition-colors text-sm';
+              btn.textContent = opt;
+              btn.onclick = () => { inputEl.value = opt; formEl.requestSubmit(); };
+              optsDiv.appendChild(btn);
+            });
+            formEl.prepend(optsDiv);
+          }
           quickReplyContainer.appendChild(formEl);
           inputEl.focus();
-          scrollToBottom();
         }
 
-        // function handleReply(answer) {
-        //   addMessage(answer, 'user');
-        //   quickReplyContainer.classList.add('hidden');
-
-        //   const q = questions[currentIndex].replace(/[\[\]\(\)\"\'\,]/g, '');
-        //   const qInput = document.createElement('input');
-        //   qInput.type = 'hidden';
-        //   qInput.name = 'questions';
-        //   qInput.value = q;
-        //   form.appendChild(qInput);
-
-        //   const aInput = document.createElement('input');
-        //   aInput.type = 'hidden';
-        //   aInput.name = answer_${currentIndex};
-        //   aInput.value = answer;
-        //   form.appendChild(aInput);
-
-        //   currentIndex++;
-        //   if (currentIndex < questions.length) {
-        //     setTimeout(askNextQuestion, 500);
-        //   } else {
-        //     setTimeout(submitProfile, 1000);
-        //   }
-        // }
-
         function handleReply(answer) {
+          // Manually stop recognition if it's running to prevent feedback loop
+          if (isListening) {
+            isContinuousMicOn = false; // Temporarily disable to prevent immediate restart
+            recognition.stop();
+            isContinuousMicOn = document.getElementById('continuous-mic-btn').classList.contains('bg-purple-200'); // Restore state
+          }
+
           addMessage(answer, 'user');
           quickReplyContainer.classList.add('hidden');
 
-          const questionText = questions[currentIndex].replace(/[\[\]\(\)\"\'\,]/g, '');
+          const questionText = questions[currentIndex].replace(/[\[\]"]/g, '');
+          if (currentIndex === 0) form.querySelector('input[name="intro"]').value = answer;
+
           const qInput = document.createElement('input');
-          qInput.type = 'hidden';
-          qInput.name = 'questions';
-          qInput.value = questionText;
-          form.appendChild(qInput);
-
+          qInput.type = 'hidden'; qInput.name = `question_${currentIndex}`; qInput.value = questionText; form.appendChild(qInput);
           const aInput = document.createElement('input');
-          aInput.type = 'hidden';
-          aInput.name = `answer_${currentIndex}`;
-          aInput.value = answer;
-          form.appendChild(aInput);
+          aInput.type = 'hidden'; aInput.name = `answer_${currentIndex}`; aInput.value = answer; form.appendChild(aInput);
 
-          // 🧠 Call feedback API
-          fetch('/home/feedback/', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: `question=${encodeURIComponent(questionText)}&answer=${encodeURIComponent(answer)}`
-          })
-            .then(res => res.json())
-            .then(data => {
+          const formData = new FormData();
+          formData.append('question', questionText);
+          formData.append('answer', answer);
+          formData.append('currentIndex', currentIndex);
+          formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+          fetch("{% url 'feedback' %}", { method: 'POST', body: formData })
+            .then(res => res.json()).then(data => {
               addMessage(data.feedback, 'bot');
-
-              currentIndex++;
-              if (currentIndex < questions.length) {
-                setTimeout(askNextQuestion, 800);
-              } else {
-                setTimeout(submitProfile, 1000);
+              if (data.next_questions) {
+                questions.push(...data.next_questions.map(item => item.question));
+                options.push(...data.next_questions.map(item => item.options));
               }
-            })
-            .catch(() => {
-              addMessage("Thanks for your answer!", 'bot');
-              currentIndex++;
-              if (currentIndex < questions.length) {
-                setTimeout(askNextQuestion, 800);
-              } else {
-                setTimeout(submitProfile, 1000);
-              }
+              proceedToNextStep();
+            }).catch((error) => {
+              console.error("Feedback API error:", error);
+              addMessage("Thanks! Let's move on.", 'bot');
+              proceedToNextStep();
             });
         }
 
+        const proceedToNextStep = () => {
+          currentIndex++;
+          if (currentIndex < questions.length) {
+            setTimeout(askNextQuestion, 800);
+          } else {
+            setTimeout(submitProfile, 1000);
+          }
+        };
 
         function askNextQuestion() {
           showTyping(true);
           setTimeout(() => {
             showTyping(false);
-            const q = questions[currentIndex].replace(/[\[\]\(\)\"\'\,]/g, '');
-            addMessage(`${q}`, 'bot');
+            const q = questions[currentIndex].replace(/[\[\]"]/g, '');
+            addMessage(q, 'bot');
             showQuickReplies();
-          }, 1000 + Math.random() * 500);
+
+            // ✅ If continuous mic is on, start listening automatically for the new question
+            if (isContinuousMicOn && !isListening) {
+              try { recognition.start(); } catch (e) { }
+            }
+          }, 1200);
         }
 
         function submitProfile() {
@@ -513,30 +443,20 @@
           setTimeout(() => {
             showTyping(false);
             addMessage("Great, I have everything I need. Analyzing your profile now...", 'bot');
-            spinner.classList.remove('hidden');
-            setTimeout(() => {
-              form.submit();
-            }, 1500);
+            setTimeout(() => form.submit(), 1500);
           }, 1000);
         }
 
-        function startConversation() {
-          addMessage(userIntro, 'user');
-          setTimeout(() => {
-            showTyping(true);
-            setTimeout(() => {
-              showTyping(false);
-              addMessage("Thanks for sharing! Now, please answer a few questions to help me understand you better.", 'bot');
-              askNextQuestion();
-            }, 1200);
-          }, 500);
-        }
+        // --- CONVERSATION START ---
+        askNextQuestion();
 
-        startConversation();
+      } catch (error) {
+        console.error("Chatbot Initialization Error:", error);
+        addMessage(`Oops! Something went wrong. I couldn't start the chat. Please try refreshing the page.`, 'bot');
+        if (quickReplyContainer) quickReplyContainer.style.display = 'none';
       }
     });
   </script>
-
 </body>
 
 </html>

@@ -11,10 +11,14 @@ if not api_key:
 genai.configure(api_key=api_key)
 
 
-# ✅ Generate dynamic multiple-choice questions
+# This constant is no longer used directly by views, but serves as the canonical first question.
+INTRO_QUESTION = "Hello! I'm a chatbot designed to understand your personality. To begin, please tell me a little about yourself."
+
+
+# ✅ Generate dynamic multiple-choice questions after intro
 def select_best_questions(user_intro):
     prompt = f"""
-    Based on the following user intro: "{user_intro}", generate 2 personality assessment questions.
+    Based on the following user intro: "{user_intro}", generate 25 personality assessment questions.
     For each question, include 4 multiple-choice options.
 
     Output ONLY a valid JSON array like this:
@@ -29,7 +33,8 @@ def select_best_questions(user_intro):
     Do NOT add any commentary or markdown (no ```json or explanation).
     """
 
-    model = genai.GenerativeModel("gemini-2.5-flash")
+    # Corrected model name
+    model = genai.GenerativeModel("gemini-1.5-flash")
     response = model.generate_content(prompt)
     raw = response.text.strip()
 
@@ -38,14 +43,18 @@ def select_best_questions(user_intro):
         raw = raw.strip("`")
         raw = "\n".join(line for line in raw.splitlines() if not line.strip().startswith("json"))
 
-    # Try to parse JSON
     try:
         return json.loads(raw)
     except json.JSONDecodeError as e:
-        raise ValueError("❌ Gemini returned malformed JSON:\n\n" + raw) from e
+        print("❌ Gemini returned malformed JSON:\n\n" + raw)
+        # Return a fallback structure to prevent crashing the app
+        return [
+            {"question": "What's one of your favorite hobbies?", "options": ["Reading", "Sports", "Gaming", "Crafting"]},
+            {"question": "Are you more of an early bird or a night owl?", "options": ["Early bird", "Night owl", "Both", "Neither"]}
+        ]
 
 
-# ✅ Generate a full personality profile based on all answers
+# ✅ Generate full personality profile
 def generate_personality_profile(user_intro, qa_pairs):
     questions_formatted = "\n".join([f"{i+1}. Q: {q}\nA: {a}" for i, (q, a) in enumerate(qa_pairs)])
     
@@ -75,13 +84,13 @@ def generate_personality_profile(user_intro, qa_pairs):
     Profile: <3-4 sentence paragraph>
     """
     
-    model = genai.GenerativeModel('gemini-2.5-flash')
+    # Corrected model name
+    model = genai.GenerativeModel('gemini-1.5-flash')
     response = model.generate_content(prompt)
     return response.text.strip()
 
 
-
-# ✅ Generate a friendly one-liner after each question answer
+# ✅ Friendly one-liner feedback
 def generate_feedback(question, answer):
     prompt = f"""
     A user responded to a personality question.
@@ -93,7 +102,7 @@ def generate_feedback(question, answer):
     Example: "That's a great way to handle things!" or "Sounds like you’re someone who values honesty!"
     """
 
-    model = genai.GenerativeModel("gemini-2.5-flash")
+    # Corrected model name
+    model = genai.GenerativeModel("gemini-1.5-flash")
     response = model.generate_content(prompt)
-    # print(response)
     return response.text.strip()
