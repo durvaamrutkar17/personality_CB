@@ -1,19 +1,18 @@
 import os
 import json
-import google.generativeai as genai
 from dotenv import load_dotenv
+import openai
 
 # Load environment variables (API key)
 load_dotenv()
-api_key = os.getenv("GEMINI_API_KEY")
+api_key = os.getenv("OPENAI_API_KEY")
 if not api_key:
-    raise ValueError("GEMINI_API_KEY is missing in .env")
-genai.configure(api_key=api_key)
+    raise ValueError("OPENAI_API_KEY is missing in .env")
 
+openai.api_key = api_key
 
-# This constant is no longer used directly by views, but serves as the canonical first question.
+# First intro question
 INTRO_QUESTION = "Hello! I'm a chatbot designed to understand your personality. To begin, please tell me a little about yourself."
-
 
 # ✅ Generate dynamic multiple-choice questions after intro
 def select_best_questions(user_intro):
@@ -33,26 +32,31 @@ def select_best_questions(user_intro):
     Do NOT add any commentary or markdown (no ```json or explanation).
     """
 
-    # Corrected model name
-    model = genai.GenerativeModel("gemini-1.5-flash")
-    response = model.generate_content(prompt)
-    raw = response.text.strip()
-
-    # Remove markdown code block if present
-    if raw.startswith("```json") or raw.startswith("```"):
-        raw = raw.strip("`")
-        raw = "\n".join(line for line in raw.splitlines() if not line.strip().startswith("json"))
-
     try:
+        response = openai.ChatCompletion.create(
+            model="gpt-4-1106-preview",  # Can change to gpt-3.5-turbo for lower cost
+            messages=[
+                {"role": "system", "content": "You are a JSON-only response generator."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.7
+        )
+
+        raw = response.choices[0].message["content"].strip()
+
+        # Remove markdown wrappers if present
+        if raw.startswith("```json") or raw.startswith("```"):
+            raw = raw.strip("`")
+            raw = "\n".join(line for line in raw.splitlines() if not line.strip().startswith("json"))
+
         return json.loads(raw)
-    except json.JSONDecodeError as e:
-        print("❌ Gemini returned malformed JSON:\n\n" + raw)
-        # Return a fallback structure to prevent crashing the app
+
+    except json.JSONDecodeError:
+        print("❌ OpenAI returned malformed JSON:\n\n" + raw)
         return [
             {"question": "What's one of your favorite hobbies?", "options": ["Reading", "Sports", "Gaming", "Crafting"]},
             {"question": "Are you more of an early bird or a night owl?", "options": ["Early bird", "Night owl", "Both", "Neither"]}
         ]
-
 
 # ✅ Generate full personality profile
 def generate_personality_profile(user_intro, qa_pairs):
@@ -83,12 +87,17 @@ def generate_personality_profile(user_intro, qa_pairs):
 
     Profile: <3-4 sentence paragraph>
     """
-    
-    # Corrected model name
-    model = genai.GenerativeModel('gemini-1.5-flash')
-    response = model.generate_content(prompt)
-    return response.text.strip()
 
+    response = openai.ChatCompletion.create(
+        model="gpt-4-1106-preview",
+        messages=[
+            {"role": "system", "content": "You are a personality analyst."},
+            {"role": "user", "content": prompt}
+        ],
+        temperature=0.7
+    )
+
+    return response.choices[0].message["content"].strip()
 
 # ✅ Friendly one-liner feedback
 def generate_feedback(question, answer):
@@ -102,7 +111,13 @@ def generate_feedback(question, answer):
     Example: "That's a great way to handle things!" or "Sounds like you’re someone who values honesty!"
     """
 
-    # Corrected model name
-    model = genai.GenerativeModel("gemini-1.5-flash")
-    response = model.generate_content(prompt)
-    return response.text.strip()
+    response = openai.ChatCompletion.create(
+        model="gpt-4-1106-preview",
+        messages=[
+            {"role": "system", "content": "You are a warm and encouraging personality chatbot."},
+            {"role": "user", "content": prompt}
+        ],
+        temperature=0.8
+    )
+
+    return response.choices[0].message["content"].strip()
