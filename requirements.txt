@@ -1,3 +1,4 @@
+openai==0.28
 django
 gunicorn
 annotated-types==0.7.0
