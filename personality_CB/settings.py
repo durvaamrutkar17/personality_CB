@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'Home',
     'astro',
     "finalResult",
+    "analysis",
 ]
 
 MIDDLEWARE = [

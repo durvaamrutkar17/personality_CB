@@ -16,7 +16,7 @@
     rel="stylesheet">
 
   <style>
-        body {
+    body {
       margin: 0;
       min-height: 100vh;
       background: linear-gradient(135deg, #8cd198, #fbc2eb);
@@ -80,13 +80,10 @@
     .animate-bounce-custom {
       animation: bounce 1.4s infinite ease-in-out both;
     }
-
-    
   </style>
 </head>
 
-<body
-  class="flex flex-col justify-center items-center min-h-screen p-4">
+<body class="flex flex-col justify-center items-center min-h-screen p-4">
 
   <!-- Main Chat Container -->
   <div id="grad"
@@ -95,28 +92,47 @@
     <!-- Chat Header -->
     <div
       class="relative flex-shrink-0 bg-gradient-to-br from-blue-600 to-blue-800 text-white p-5 shadow-md flex justify-between items-center">
-      <!-- Mute/Unmute Button -->
-      <button id="toggle-audio-btn"
-        class="w-10 h-10 flex items-center justify-center rounded-full transition-colors duration-200 hover:bg-white/15"
-        title="Toggle Audio">
-        <svg id="speaker-on-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-          fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-          class="lucide lucide-volume-2">
-          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-          <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
-          <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
-        </svg>
-        <svg id="speaker-off-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-          fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-          class="lucide lucide-volume-x hidden">
-          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-          <line x1="23" x2="17" y1="9" y2="15" />
-          <line x1="17" x2="23" y1="9" y2="15" />
-        </svg>
-      </button>
+      <div class="flex items-center space-x-1">
+        <!-- Mute/Unmute Button -->
+        <button id="toggle-audio-btn"
+          class="w-10 h-10 flex items-center justify-center rounded-full transition-colors duration-200 hover:bg-white/15"
+          title="Toggle Audio">
+          <svg id="speaker-on-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="lucide lucide-volume-2">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+          </svg>
+          <svg id="speaker-off-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="lucide lucide-volume-x hidden">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+            <line x1="23" x2="17" y1="9" y2="15" />
+            <line x1="17" x2="23" y1="9" y2="15" />
+          </svg>
+        </button>
+        <!-- Reset Chat Button -->
+        <button id="reset-chat-btn"
+          class="w-10 h-10 flex items-center justify-center rounded-full transition-colors duration-200 hover:bg-white/15"
+          title="Reset Chat">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="lucide lucide-rotate-cw">
+            <path d="M21 2v6h-6" />
+            <path d="M3 12a9 9 0 1 1 9 9 9.75 9.75 0 0 1-6.74-2.74L3 12" />
+          </svg>
+        </button>
+      </div>
       <h2 class="font-orbitron text-2xl absolute left-1/2 -translate-x-1/2">✨ AstroBot ✨</h2>
-      <a href="{% url 'logout' %}"
-        class="py-1.5 px-4 border border-white/70 rounded-full text-white text-sm font-medium transition-colors duration-200 hover:bg-white/15 hover:border-white">Logout</a>
+      <div class="flex items-center space-x-2">
+        <button id="conversational-mode-btn" type="button"
+          class="px-3 py-1.5 text-sm text-white border border-white/70 rounded-full hover:bg-white/15 transition-colors">
+          Conversational Chat
+        </button>
+        <a href="{% url 'logout' %}"
+          class="py-1.5 px-4 border border-white/70 rounded-full text-white text-sm font-medium transition-colors duration-200 hover:bg-white/15 hover:border-white">Logout</a>
+      </div>
     </div>
 
     <!-- Chat Message Box -->
@@ -146,131 +162,135 @@
           <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
         </svg>
       </button>
-      <button onclick="window.location.href = '/finalResult/'" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg">
+      <button onclick="window.location.href = '/finalResult/'"
+        class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg">
         Next
       </button>
-    </div >
-  </div >
+    </div>
+  </div>
 
-          <!-- Hidden form -->
-          <form method="post" id="astro-form" class="hidden">
-            {% csrf_token %}
-            <input type="date" name="dob" id="hidden-dob">
-              <input type="time" name="tob" id="hidden-tob">
-                <input type="text" name="place" id="hidden-place">
-                </form>
+  <!-- Hidden form -->
+  <form method="post" id="astro-form" class="hidden">
+    {% csrf_token %}
+    <input type="text" name="dob" id="hidden-dob">
+    <input type="text" name="tob" id="hidden-tob">
+    <input type="text" name="place" id="hidden-place">
+  </form>
 
-                <!-- Hidden Django response -->
-                {% if response %}
-                <div id="django-response" class="hidden">
-                  <h2 class="text-xl font-semibold mb-3 font-orbitron">🪔 Your Astrological Report</h2>
-                  <ul class="list-none space-y-4 text-left">
-                    {% for point in response %}
-                    <li>{{ point| safe}}</li>
-                    {% endfor %}
-                  </ul>
-                </div>
-                {% endif %}
+  <!-- Hidden Django response -->
+  {% if response %}
+  <div id="django-response" class="hidden">
+    <h2 class="text-xl font-semibold mb-3 font-orbitron">🪔 Your Astrological Report</h2>
+    <ul class="list-none space-y-4 text-left">
+      {% for point in response %}
+      <li>{{ point| safe}}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
 
-                <button onclick="goNext()" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg hidden">
-                  Next
-                </button>
+  <button onclick="goNext()" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg hidden">
+    Next
+  </button>
 
-                <script>
-                  function goNext() {
-                    window.location.href = 'finalResult'; // Change to your destination
-  }
-      </script>
+  <script>
+    function goNext() {
+      window.location.href = 'finalResult'; // Change to your destination
+    }
+  </script>
 
-      <script>
+  <script>
     document.addEventListener('DOMContentLoaded', () => {
       // --- Element References ---
       const chatBox = document.getElementById('chat-box');
-            const userInput = document.getElementById('user-input');
-            const sendBtn = document.getElementById('send-btn');
-            const micBtn = document.getElementById('mic-btn');
-            const toggleAudioBtn = document.getElementById('toggle-audio-btn');
-            const speakerOnIcon = document.getElementById('speaker-on-icon');
-            const speakerOffIcon = document.getElementById('speaker-off-icon');
+      const userInput = document.getElementById('user-input');
+      const sendBtn = document.getElementById('send-btn');
+      const micBtn = document.getElementById('mic-btn');
+      const toggleAudioBtn = document.getElementById('toggle-audio-btn');
+      const speakerOnIcon = document.getElementById('speaker-on-icon');
+      const speakerOffIcon = document.getElementById('speaker-off-icon');
+      const conversationalModeBtn = document.getElementById('conversational-mode-btn');
+      const resetChatBtn = document.getElementById('reset-chat-btn'); // New Reset Button
 
-            // --- State ---
-            let conversationState = 'awaiting_dob';
-            const userDetails = {dob: '', tob: '', place: '' };
-            let isMuted = false;
-            let isRecording = false;
+      // --- State ---
+      let conversationState = 'awaiting_dob';
+      let userDetails = { dob: '', tob: '', place: '' };
+      let isMuted = false;
+      let isRecording = false;
+      let isConversationalMode = false;
 
-            // --- Web Speech API Setup ---
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            const recognition = SpeechRecognition ? new SpeechRecognition() : null;
-            const speechSynthesis = window.speechSynthesis;
-            let voices = [];
+      // --- Web Speech API Setup ---
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const recognition = SpeechRecognition ? new SpeechRecognition() : null;
+      const speechSynthesis = window.speechSynthesis;
+      let voices = [];
 
-            function loadVoices() {
-              voices = speechSynthesis.getVoices();
+      function loadVoices() {
+        voices = speechSynthesis.getVoices();
       }
-            // Voices are loaded asynchronously
-            speechSynthesis.onvoiceschanged = loadVoices;
-            loadVoices();
+      // Voices are loaded asynchronously
+      speechSynthesis.onvoiceschanged = loadVoices;
+      loadVoices();
 
-            // --- Bot Questions ---
-            const botQuestions = {
-              dob: "Welcome to AstroBot! I can generate your personalized astrological report. To begin, please enter your <b>Date of Birth</b> (e.g., YYYY-MM-DD).",
-            tob: "Great! Now, what is your <b>Time of Birth</b>? Please use a 24-hour format (e.g., 14:30).",
-            place: "Perfect. Finally, what is your <b>Place of Birth</b>? (e.g., New York, USA)",
-            processing: "Thank you! I have all the details. Casting the stars for you now... ✨",
+      // --- Bot Questions ---
+      const botQuestions = {
+        dob: "Welcome to AstroBot! I can generate your personalized astrological report. To begin, please enter your <b>Date of Birth</b> (e.g., YYYY-MM-DD).",
+        tob: "Great! Now, what is your <b>Time of Birth</b>? Please use a 24-hour format (e.g., 14:30).",
+        place: "Perfect. Finally, what is your <b>Place of Birth</b>? (e.g., New York, USA)",
+        processing: "Thank you! I have all the details. Casting the stars for you now... ✨",
       };
 
-            // --- Core Functions ---
-            function speakMessage(text) {
+      // --- Core Functions ---
+      function speakMessage(text) {
         if (isMuted || !speechSynthesis) return;
 
-            // Clean HTML tags for speech
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = text;
-            const cleanText = tempDiv.textContent || tempDiv.innerText || "";
+        // Clean HTML tags for speech
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = text;
+        const cleanText = tempDiv.textContent || tempDiv.innerText || "";
 
-            speechSynthesis.cancel(); // Stop any previous speech
-            const utterance = new SpeechSynthesisUtterance(cleanText);
+        speechSynthesis.cancel(); // Stop any previous speech
+        const utterance = new SpeechSynthesisUtterance(cleanText);
 
         // Try to find a better quality voice
         const googleVoice = voices.find(voice => voice.name.includes('Google') && voice.lang.startsWith('en'));
         utterance.voice = googleVoice || voices.find(voice => voice.lang.startsWith('en')) || voices[0];
 
-            speechSynthesis.speak(utterance);
+        speechSynthesis.speak(utterance);
       }
 
-            function addMessage(text, sender) {
+      function addMessage(text, sender) {
         const messageElement = document.createElement('div');
-            const baseClasses = ['max-w-[85%]', 'md:max-w-[80%]', 'py-3', 'px-5', 'rounded-2xl', 'break-words', 'leading-relaxed', 'animate-pop-in'];
+        const baseClasses = ['max-w-[85%]', 'md:max-w-[80%]', 'py-3', 'px-5', 'rounded-2xl', 'break-words', 'leading-relaxed', 'animate-pop-in'];
 
-            if (sender === 'user') {
-              messageElement.classList.add(...baseClasses, 'bg-blue-600', 'text-white', 'self-end', 'rounded-br-lg');
+        if (sender === 'user') {
+          messageElement.classList.add(...baseClasses, 'bg-blue-600', 'text-white', 'self-end', 'rounded-br-lg');
         } else {
-              messageElement.classList.add(...baseClasses, 'bg-gray-200', 'text-gray-800', 'self-start', 'rounded-bl-lg');
-            speakMessage(text); // Speak the bot's message
+          messageElement.classList.add(...baseClasses, 'bg-gray-200', 'text-gray-800', 'self-start', 'rounded-bl-lg');
+          speakMessage(text); // Speak the bot's message
         }
 
-            messageElement.innerHTML = text;
-            chatBox.appendChild(messageElement);
-            chatBox.scrollTop = chatBox.scrollHeight;
+        messageElement.innerHTML = text;
+        chatBox.appendChild(messageElement);
+        chatBox.scrollTop = chatBox.scrollHeight;
       }
 
-            function showTypingIndicator() {
+      function showTypingIndicator() {
         const typingElement = document.createElement('div');
-            typingElement.id = 'typing';
-            const baseClasses = ['max-w-[85%]', 'md:max-w-[80%]', 'py-3', 'px-5', 'rounded-2xl', 'break-words', 'leading-relaxed', 'animate-pop-in'];
-            typingElement.classList.add(...baseClasses, 'bg-gray-200', 'text-gray-800', 'self-start', 'rounded-bl-lg');
+        typingElement.id = 'typing';
+        const baseClasses = ['max-w-[85%]', 'md:max-w-[80%]', 'py-3', 'px-5', 'rounded-2xl', 'break-words', 'leading-relaxed', 'animate-pop-in'];
+        typingElement.classList.add(...baseClasses, 'bg-gray-200', 'text-gray-800', 'self-start', 'rounded-bl-lg');
 
-            typingElement.innerHTML = `<div class="flex items-center justify-center gap-1.5 h-6"><span class="h-2 w-2 bg-gray-400 rounded-full animate-bounce-custom" style="animation-delay: -0.32s;"></span><span class="h-2 w-2 bg-gray-400 rounded-full animate-bounce-custom" style="animation-delay: -0.16s;"></span><span class="h-2 w-2 bg-gray-400 rounded-full animate-bounce-custom"></span></div>`;
-        
+        typingElement.innerHTML = `<div class="flex items-center justify-center gap-1.5 h-6"><span class="h-2 w-2 bg-gray-400 rounded-full animate-bounce-custom" style="animation-delay: -0.32s;"></span><span class="h-2 w-2 bg-gray-400 rounded-full animate-bounce-custom" style="animation-delay: -0.16s;"></span><span class="h-2 w-2 bg-gray-400 rounded-full animate-bounce-custom"></span></div>`;
+
         chatBox.appendChild(typingElement);
         chatBox.scrollTop = chatBox.scrollHeight;
       }
-      
+
       function removeTypingIndicator() {
         document.getElementById('typing')?.remove();
       }
-      
+
       function askNextQuestion() {
         showTypingIndicator();
         setTimeout(() => {
@@ -278,11 +298,11 @@
           let question = '';
           if (conversationState === 'awaiting_dob') {
             question = botQuestions.dob;
-            userInput.type = 'date';
+            userInput.type = 'text';
             userInput.placeholder = 'YYYY-MM-DD';
           } else if (conversationState === 'awaiting_tob') {
             question = botQuestions.tob;
-            userInput.type = 'time';
+            userInput.type = 'text';
             userInput.placeholder = 'HH:MM (24-hour)';
           } else if (conversationState === 'awaiting_place') {
             question = botQuestions.place;
@@ -297,18 +317,18 @@
       function handleUserInput() {
         const text = userInput.value.trim();
         if (!text || userInput.disabled) return;
-        
+
         addMessage(text, 'user');
-        
+
         switch (conversationState) {
           case 'awaiting_dob': userDetails.dob = text; conversationState = 'awaiting_tob'; askNextQuestion(); break;
           case 'awaiting_tob': userDetails.tob = text; conversationState = 'awaiting_place'; askNextQuestion(); break;
           case 'awaiting_place': userDetails.place = text; conversationState = 'processing'; submitDetails(); break;
         }
-        
+
         userInput.value = '';
       }
-      
+
       function submitDetails() {
         showTypingIndicator();
         setTimeout(() => {
@@ -318,15 +338,44 @@
           document.getElementById('hidden-dob').value = userDetails.dob;
           document.getElementById('hidden-tob').value = userDetails.tob;
           document.getElementById('hidden-place').value = userDetails.place;
-          
+
           setTimeout(() => { document.getElementById('astro-form').submit(); }, 1000);
         }, 1500);
+      }
+
+      // --- NEW: Reset Chat Function ---
+      function resetChat() {
+        // 1. Clear the visual chat box
+        chatBox.innerHTML = '';
+
+        // 2. Stop any speaking
+        speechSynthesis.cancel();
+
+        // 3. Reset internal state
+        conversationState = 'awaiting_dob';
+        userDetails = { dob: '', tob: '', place: '' };
+
+        // 4. Re-enable all inputs
+        userInput.disabled = false;
+        sendBtn.disabled = false;
+        micBtn.disabled = false;
+        userInput.placeholder = 'Type or press mic to talk...';
+        micBtn.classList.remove('cursor-not-allowed', 'opacity-50');
+
+        // 5. Clear hidden form values
+        document.getElementById('hidden-dob').value = '';
+        document.getElementById('hidden-tob').value = '';
+        document.getElementById('hidden-place').value = '';
+
+        // 6. Ask the first question again
+        askNextQuestion();
       }
 
       // --- Event Handlers ---
       sendBtn.addEventListener('click', handleUserInput);
       userInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleUserInput(); });
-      
+      resetChatBtn.addEventListener('click', resetChat); // Add listener for reset button
+
       toggleAudioBtn.addEventListener('click', () => {
         isMuted = !isMuted;
         speakerOnIcon.classList.toggle('hidden', isMuted);
@@ -335,10 +384,25 @@
           speechSynthesis.cancel();
         }
       });
-      
+
+      conversationalModeBtn.addEventListener('click', () => {
+        isConversationalMode = !isConversationalMode;
+        if (isConversationalMode) {
+          conversationalModeBtn.textContent = 'Manual Chat';
+          userInput.style.display = 'none';
+          sendBtn.style.display = 'none';
+          if (recognition) recognition.start();
+        } else {
+          conversationalModeBtn.textContent = 'Conversational Chat';
+          userInput.style.display = 'block';
+          sendBtn.style.display = 'block';
+          if (recognition) recognition.stop();
+        }
+      });
+
       // --- Speech Recognition Logic ---
       if (recognition) {
-        recognition.continuous = false;
+        recognition.continuous = true;
         recognition.interimResults = true;
         recognition.lang = 'en-US';
 
@@ -356,24 +420,28 @@
           micBtn.classList.add('bg-red-500', 'text-white', 'animate-pulse');
           userInput.placeholder = 'Listening...';
         };
-        
+
         recognition.onend = () => {
           isRecording = false;
           micBtn.classList.add('bg-gray-200', 'hover:bg-gray-300');
           micBtn.classList.remove('bg-red-500', 'text-white', 'animate-pulse');
           userInput.placeholder = 'Type or press mic to talk...';
-          // Automatically send the message after speaking
-          if (userInput.value.trim()) {
-            handleUserInput();
+          if (isConversationalMode) {
+            recognition.start();
           }
         };
 
         recognition.onresult = (event) => {
           let transcript = '';
           for (let i = event.resultIndex; i < event.results.length; ++i) {
-            transcript += event.results[i][0].transcript;
+            if (event.results[i].isFinal) {
+              transcript += event.results[i][0].transcript;
+            }
           }
-          userInput.value = transcript;
+          if (transcript) {
+            userInput.value = transcript;
+            handleUserInput();
+          }
         };
 
         recognition.onerror = (event) => {
@@ -384,6 +452,7 @@
         // Hide audio features if not supported
         micBtn.style.display = 'none';
         toggleAudioBtn.style.display = 'none';
+        conversationalModeBtn.style.display = 'none';
         console.warn("Speech Recognition or Synthesis not supported by this browser.");
       }
 
@@ -395,7 +464,7 @@
           tob: "{{ request.POST.tob }}",
           place: "{{ request.POST.place }}",
         };
-        
+
         addMessage(botQuestions.dob, 'bot');
         if (submittedData.dob) addMessage(submittedData.dob, 'user');
         addMessage(botQuestions.tob, 'bot');
@@ -403,23 +472,23 @@
         addMessage(botQuestions.place, 'bot');
         if (submittedData.place) addMessage(submittedData.place, 'user');
         addMessage(botQuestions.processing, 'bot');
-        
+
         showTypingIndicator();
         setTimeout(() => {
           removeTypingIndicator();
           addMessage(djangoResponseDiv.innerHTML, 'bot');
-          userInput.placeholder = 'Refresh page to start over.';
+          userInput.placeholder = 'Press the reset button to start over.';
           userInput.disabled = true;
           sendBtn.disabled = true;
           micBtn.disabled = true;
           micBtn.classList.add('cursor-not-allowed', 'opacity-50');
         }, 2000);
-        
+
       } else {
         askNextQuestion();
       }
     });
-      </script>
+  </script>
 </body>
 
 </html>

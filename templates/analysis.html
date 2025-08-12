@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Astro Chat</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    /* === merged CSS === */
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: system-ui, Arial, sans-serif; background:#0b0b10; color:#e6e6ea; }
+    .wrap { max-width: 720px; margin: 40px auto; padding: 16px; }
+    h1 { margin: 0 0 16px; font-weight: 700; font-size: 1.6rem; }
+
+    #chatbox {
+      height: 60vh; overflow-y: auto; background: #12121a; border-radius: 12px;
+      padding: 12px; box-shadow: 0 2px 12px rgba(0,0,0,.3); margin-bottom: 12px;
+    }
+    .bubble { max-width: 80%; padding: 10px 12px; margin: 8px 0; border-radius: 12px; white-space: pre-wrap; line-height: 1.35; }
+    .bubble.me { background: #2d2dff; color: #fff; margin-left: auto; border-bottom-right-radius: 4px; }
+    .bubble.bot { background: #1c1c26; color: #e6e6ea; margin-right: auto; border-bottom-left-radius: 4px; }
+
+    form { display: flex; gap: 8px; }
+    input[type="text"] {
+      flex: 1; padding: 12px; border-radius: 10px; border: 1px solid #303045; background:#12121a; color:#e6e6ea;
+      outline: none;
+    }
+    input[type="text"]::placeholder { color:#8c8ca3; }
+    button {
+      padding: 12px 16px; border: 0; border-radius: 10px; background:#2d2dff; color:white; font-weight:600; cursor:pointer;
+      transition: opacity .15s ease-in-out, transform .02s;
+    }
+    button:disabled { opacity:.6; cursor: not-allowed; }
+    button:active { transform: translateY(1px); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>🔮 Astro Chat</h1>
+
+    <div id="chatbox" aria-live="polite"></div>
+
+    <form id="chatForm" method="post" autocomplete="off">
+      {% csrf_token %}
+      <input id="msg" name="message" type="text" placeholder="Ask about Aries, Taurus, love, career…" />
+      <button id="sendBtn" type="submit">Send</button>
+    </form>
+  </div>
+
+  <script>
+    // === merged JS ===
+
+    // Get CSRF token from cookie (Django)
+    function getCookie(name) {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(';').shift();
+    }
+    const csrftoken = getCookie('csrftoken');
+
+    const chatbox = document.getElementById('chatbox');
+    const form = document.getElementById('chatForm');
+    const input = document.getElementById('msg');
+    const sendBtn = document.getElementById('sendBtn');
+
+    function addBubble(text, who) {
+      const div = document.createElement('div');
+      div.className = `bubble ${who}`;
+      div.textContent = text;
+      chatbox.appendChild(div);
+      chatbox.scrollTop = chatbox.scrollHeight;
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const text = input.value.trim();
+      if (!text) return;
+
+      addBubble(text, 'me');
+      input.value = '';
+      addBubble('…thinking', 'bot');
+      sendBtn.disabled = true;
+
+      try {
+        const formData = new FormData();
+        formData.append('message', text);
+
+        // If you named your URL pattern `chat_api` (as shown earlier), this resolves to /api/chat/
+        const endpoint = "{% url 'chat_api' %}";
+
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'X-CSRFToken': csrftoken },
+          body: formData
+        });
+
+        const data = await res.json();
+        chatbox.lastChild.textContent = data.reply || 'No reply';
+        chatbox.lastChild.className = 'bubble bot';
+      } catch (err) {
+        chatbox.lastChild.textContent = 'Error contacting server';
+      } finally {
+        sendBtn.disabled = false;
+        input.focus();
+      }
+    });
+
+    // Optional: submit with Enter from the input
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        form.requestSubmit();
+      }
+    });
+  </script>
+</body>
+</html>

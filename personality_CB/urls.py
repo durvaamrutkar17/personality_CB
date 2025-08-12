@@ -10,4 +10,5 @@ urlpatterns = [
     path('home', include('Home.urls')),
     path('astro', include('astro.urls')),
     path('finalResult', include('finalResult.urls')),
+    path('analysis', include('analysis.urls')),
 ]
