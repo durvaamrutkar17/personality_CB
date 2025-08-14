@@ -142,23 +142,6 @@
   </div>
 
   <script>
-    // document.getElementById("continuous-mic-btn").addEventListener("click", function () {
-    //   let el = document.getElementById('continuous-mic-text');
-    //   let textarea = document.getElementById('chat-textarea'); // replace with your textarea's id
-    //   let submitBtn = document.getElementById('submitBtn');
-
-    //   if (el.textContent === 'Conversational Chat') {
-    //     el.textContent = 'Manual Chat';
-    //     textarea.style.display = 'none'; // hide for Conversational Chat
-    //     submitBtn.style.display = 'none';
-    //   } else {
-    //     el.textContent = 'Conversational Chat';
-    //     textarea.style.display = 'block'; // show for Manual Chat
-    //     submitBtn.style.display = 'block';
-    //   }
-    // });
-
-
     // --- 1. Universal Setup ---
     const voiceToggleBtn = document.getElementById('voice-toggle-btn');
     if (voiceToggleBtn) {
@@ -374,6 +357,7 @@
           inputEl.focus();
         }
 
+        // --- MODIFIED FUNCTION ---
         function handleReply(answer) {
           // Manually stop recognition if it's running to prevent feedback loop
           if (isListening) {
@@ -384,6 +368,7 @@
 
           addMessage(answer, 'user');
           quickReplyContainer.classList.add('hidden');
+          showTyping(true); // <-- MODIFIED: Show typing indicator immediately after user reply
 
           const questionText = questions[currentIndex].replace(/[\[\]"]/g, '');
           if (currentIndex === 0) form.querySelector('input[name="intro"]').value = answer;
@@ -401,6 +386,7 @@
 
           fetch("{% url 'feedback' %}", { method: 'POST', body: formData })
             .then(res => res.json()).then(data => {
+              showTyping(false); // <-- MODIFIED: Hide indicator before showing bot message
               addMessage(data.feedback, 'bot');
               if (data.next_questions) {
                 questions.push(...data.next_questions.map(item => item.question));
@@ -408,6 +394,7 @@
               }
               proceedToNextStep();
             }).catch((error) => {
+              showTyping(false); // <-- MODIFIED: Also hide on error
               console.error("Feedback API error:", error);
               addMessage("Thanks! Let's move on.", 'bot');
               proceedToNextStep();
@@ -431,7 +418,6 @@
             addMessage(q, 'bot');
             showQuickReplies();
 
-            // ✅ If continuous mic is on, start listening automatically for the new question
             if (isContinuousMicOn && !isListening) {
               try { recognition.start(); } catch (e) { }
             }
@@ -439,11 +425,20 @@
         }
 
         function submitProfile() {
+          const loadingOverlay = document.getElementById('loading-overlay');
           showTyping(true);
           setTimeout(() => {
             showTyping(false);
-            addMessage("Great, I have everything I need. Analyzing your profile now...", 'bot');
-            setTimeout(() => form.submit(), 1500);
+            addMessage("Great, I have everything I need. I'm now creating your personality profile.", 'bot');
+            
+            if (loadingOverlay) {
+                loadingOverlay.classList.remove('hidden');
+            }
+
+            setTimeout(() => {
+                form.submit();
+            }, 500); 
+            
           }, 1000);
         }
 
@@ -457,6 +452,13 @@
       }
     });
   </script>
+
+  <!-- Loading Spinner Overlay -->
+  <div id="loading-overlay" class="fixed inset-0 bg-white bg-opacity-80 backdrop-blur-sm flex flex-col items-center justify-center hidden z-50">
+    <div class="w-16 h-16 border-4 border-purple-300 border-t-purple-600 rounded-full animate-spin"></div>
+    <p class="text-purple-800 mt-4 text-lg font-semibold">Analyzing your profile...</p>
+    <p class="text-gray-600 mt-1">Please wait a moment.</p>
+  </div>
 </body>
 
 </html>
